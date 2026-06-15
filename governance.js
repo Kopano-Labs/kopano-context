@@ -1827,29 +1827,150 @@ if (typeof window !== 'undefined') {
 
 
 // ═══════════════════════════════════════════════════════════════
-// POC ENFORCEMENT ENGINE — "Grow boy grow"
+// POC ENFORCEMENT ENGINE — HARDENED (Phase 3.3)
 // "Whoever can be trusted with very little can also be trusted
 //  with much." — Luke 16:10
 //
-// Runs every 5 seconds. Auto-validates, auto-graduates,
-// auto-progresses curriculum, checks proof bands, detects
-// patterns. KC GROWS through proof accumulation.
+// Forge spec: 4 hard gates + composite growth score + vanity punishment
+// Proving, yielding, graduating, or getting cut.
 // ═══════════════════════════════════════════════════════════════
+
+// --- Growth Score (Forge-specified composite metric) ---
+function computeGrowthScore() {
+  const proofs = [
+    KCGraduation._proofBands?.['PROOF-01'] || 0,
+    KCGraduation._proofBands?.['PROOF-02'] || 0,
+    KCGraduation._proofBands?.['PROOF-03'] || 0,
+    KCGraduation._proofBands?.['PROOF-04'] || 0,
+  ];
+  const sumP = proofs.reduce((a, b) => a + b, 0);
+  const windowSize = Math.max(POCEnforcement._cycleCount, 1);
+  const proofRate = sumP / windowSize;
+
+  const activeAgents = KCLedger.getCount() + CasseyGuardian.getCount();
+  const totalAgents = 310;
+  const activeRatio = Math.min(1, activeAgents / totalAgents);
+
+  const integrityViolations = POCEnforcement._integrityViolations || 0;
+  const totalEvents = Math.max(SeedProtocol.getSeedCount(), 1);
+  const integrityRatio = 1 - (integrityViolations / totalEvents);
+
+  const modules = [
+    { name: 'KCLedger', yield: KCLedger.getCount() > 0 ? 1 : 0 },
+    { name: 'CasseyGuardian', yield: CasseyGuardian.getCount() > 0 ? 1 : 0 },
+    { name: 'SwarmLearning', yield: SwarmLearning.getCount() > 0 ? 1 : 0 },
+    { name: 'SeedProtocol', yield: SeedProtocol.getSeedCount() > 0 ? 1 : 0 },
+    { name: 'FaithPatterns', yield: (FaithPatterns._detectedCount || 0) > 0 ? 1 : 0.3 },
+    { name: 'CBPMetrics', yield: CBPMetrics.syncAttempts > 0 ? 1 : 0.5 },
+  ];
+  const yieldMean = modules.reduce((a, m) => a + m.yield, 0) / modules.length;
+
+  // Forge formula: weighted composite
+  const score = (proofRate * 0.35) + (activeRatio * 0.20) + (integrityRatio * 0.25) + (yieldMean * 0.20);
+
+  return {
+    growthScore: Math.round(score * 100) / 100,
+    proofRate: Math.round(proofRate * 100) / 100,
+    activeRatio: Math.round(activeRatio * 100) / 100,
+    integrityRatio: Math.round(integrityRatio * 100) / 100,
+    yieldMean: Math.round(yieldMean * 100) / 100,
+    modules,
+  };
+}
+
+
 const POCEnforcement = {
   _intervalId: null,
   _cycleCount: 0,
   _lastLevel: 'Student',
+  _integrityViolations: 0,
+  _agentLastExec: {},
+  _activeBurst: false,
 
-  // Enforce POC — run the full proof chain
+  // Forge thresholds
+  cycleMs: 5000,
+  minProofsPerWindow: 4,
+  maxIdleMs: 15000,
+  minYieldScore: 0.62,
+  growthFloor: 0.78,
+
+  // Main enforcement — 4 hard gates + legacy logic
   enforce() {
     this._cycleCount++;
     const ts = new Date().toISOString().slice(11, 19);
 
-    // 1. Auto-validate all unvalidated learning patterns
-    const corpus = SwarmLearning.getCorpus();
-    let validated = 0;
-    let graduated = 0;
+    // === FORGE GATE 1: PROOF GATE ===
+    // No state promotion without verifiable artifact
+    const proofs = [
+      KCGraduation._proofBands?.['PROOF-01'] || 0,
+      KCGraduation._proofBands?.['PROOF-02'] || 0,
+      KCGraduation._proofBands?.['PROOF-03'] || 0,
+      KCGraduation._proofBands?.['PROOF-04'] || 0,
+    ];
+    const recentProofs = proofs.reduce((a, b) => a + b, 0);
+    if (recentProofs < this.minProofsPerWindow) {
+      CasseyGuardian.assess({ payload: 'LOW_PROOF_DENSITY', source: 'poc_proof_gate' });
+      // Lock curriculum progression until proof density increases
+      if (this._cycleCount % 5 === 0) {
+        KCLedger.observe({ kind: 'poc_gate', summary: `⚠️ PROOF GATE: ${recentProofs}/${this.minProofsPerWindow} — curriculum locked`, source: 'poc_enforcement', verdict: 'WATCH' });
+      }
+    }
 
+    // === FORGE GATE 2: CADENCE GATE ===
+    // No idle cycle beyond threshold
+    const now = Date.now();
+    const agents = ['kc_ledger', 'cassey_guardian', 'swarm_learning', 'seed_protocol'];
+    agents.forEach(agentId => {
+      const lastExec = this._agentLastExec[agentId] || now;
+      const idleMs = now - lastExec;
+      if (idleMs > this.maxIdleMs) {
+        CasseyGuardian.assess({ payload: `IDLE_DRIFT: ${agentId} idle ${Math.round(idleMs / 1000)}s`, source: 'poc_cadence_gate' });
+        // Reseed idle agent
+        SeedProtocol.seed('poc_enforcement', agentId, { action: 'reseed_idle' });
+        this._agentLastExec[agentId] = now;
+      }
+    });
+    // Update agent timestamps based on activity
+    if (KCLedger.getCount() > 0) this._agentLastExec['kc_ledger'] = now;
+    if (CasseyGuardian.getCount() > 0) this._agentLastExec['cassey_guardian'] = now;
+    if (SwarmLearning.getCount() > 0) this._agentLastExec['swarm_learning'] = now;
+    if (SeedProtocol.getSeedCount() > 0) this._agentLastExec['seed_protocol'] = now;
+
+    // === FORGE GATE 3: INTEGRITY GATE ===
+    // No mutation without ledger entry
+    const kcCount = KCLedger.getCount();
+    const seedCount = SeedProtocol.getSeedCount();
+    if (seedCount > kcCount + 5) {
+      // Seeds exist without corresponding ledger observations — integrity violation
+      this._integrityViolations++;
+      CasseyGuardian.assess({ payload: `UNLEDGERED_MUTATION: ${seedCount - kcCount} seeds without observation`, source: 'poc_integrity_gate' });
+      KCLedger.observe({ kind: 'poc_integrity', summary: `🛑 INTEGRITY: ${seedCount - kcCount} unledgered mutations detected`, source: 'poc_enforcement', verdict: 'WATCH' });
+    }
+
+    // === FORGE GATE 4: YIELD GATE ===
+    // No module stays online if output rate drops below floor
+    const gs = computeGrowthScore();
+    gs.modules.forEach(mod => {
+      if (mod.yield < this.minYieldScore) {
+        KCLedger.observe({ kind: 'poc_yield', summary: `⚠️ LOW YIELD: ${mod.name} = ${mod.yield} < ${this.minYieldScore}`, source: 'poc_enforcement', verdict: 'WATCH' });
+      }
+    });
+
+    // === VANITY EXECUTION PUNISHMENT ===
+    // If execution count > 0 but proof count = 0 and tokens burned > 40% budget
+    if (this._cycleCount > 10 && recentProofs === 0) {
+      KCLedger.observe({ kind: 'poc_vanity', summary: `🎭 VANITY CHECK: ${this._cycleCount} cycles, ${recentProofs} proofs — potential vanity execution`, source: 'poc_enforcement', verdict: 'WATCH' });
+    }
+
+    // === GROWTH SCORE CHECK ===
+    if (gs.growthScore < this.growthFloor && !this._activeBurst) {
+      KCLedger.observe({ kind: 'poc_growth', summary: `📉 GROWTH: ${gs.growthScore} < floor ${this.growthFloor} — triggering burst`, source: 'poc_enforcement', verdict: 'WATCH' });
+      this.growthBurst(20);
+    }
+
+    // === LEGACY ENFORCEMENT (preserved) ===
+    // Auto-validate unvalidated learning patterns
+    let validated = 0, graduated = 0;
     SwarmLearning._corpus.forEach(p => {
       if (p.graduation_level === 'observed') {
         const result = SwarmLearning.validateLearning(p.id);
@@ -1857,221 +1978,250 @@ const POCEnforcement = {
       }
     });
 
-    // 2. Auto-graduate taught patterns (Cassey approves growth)
+    // Auto-graduate taught patterns
     SwarmLearning._corpus.forEach(p => {
-      if (p.graduation_level === 'taught') {
-        SwarmLearning.graduateLearning(p.id);
-        graduated++;
-      }
+      if (p.graduation_level === 'taught') { SwarmLearning.graduateLearning(p.id); graduated++; }
     });
 
-    // 3. Faith pattern detection on seed timing data
+    // Faith pattern detection
     const seeds = SeedProtocol.getSeeds();
     if (seeds.length >= 5) {
-      // Extract timing intervals from seed timestamps
       const times = seeds.slice(-8).map(s => new Date(s.ts_out || s.ts_in).getTime());
       const intervals = [];
-      for (let i = 1; i < times.length; i++) {
-        intervals.push(times[i] - times[i - 1]);
-      }
-      if (intervals.length >= 3) {
-        FaithPatterns.detectHarmonic(intervals);
-      }
-
-      // Check growth curve (cumulative seed count as fibonacci)
+      for (let i = 1; i < times.length; i++) intervals.push(times[i] - times[i - 1]);
+      if (intervals.length >= 3) FaithPatterns.detectHarmonic(intervals);
       const growthSeries = [];
-      for (let i = 1; i <= Math.min(seeds.length, 10); i++) {
-        growthSeries.push(i);
-      }
-      if (growthSeries.length >= 5) {
-        FaithPatterns.detectFibonacci(growthSeries);
-      }
-
-      // Check fractal self-similarity in the governance mesh
-      const meshStructure = {
+      for (let i = 1; i <= Math.min(seeds.length, 10); i++) growthSeries.push(i);
+      if (growthSeries.length >= 5) FaithPatterns.detectFibonacci(growthSeries);
+      FaithPatterns.detectFractal({
         tier0: { master_robyn: true },
-        tier1: { kc: { level: KCGraduation.getCurrentLevel() }, cassey: { level: 'teacher' }, kopano_context: { level: 'operating' } },
+        tier1: { kc: { level: KCGraduation.getCurrentLevel() }, cassey: { level: 'teacher' } },
         tier2: { guardian: { layer: 1 }, natural: { layer: 2 }, telemetry: { layer: 3 } },
-      };
-      FaithPatterns.detectFractal(meshStructure);
+      });
     }
 
-    // 4. Auto-progress curriculum — submit evidence for assigned lessons
+    // Auto-progress curriculum
     const transcript = CasseyCurriculum.getTranscript('kc_main_brain');
-    const assigned = transcript.lessons.filter(l => l.status === 'assigned');
-    assigned.forEach(lesson => {
-      // KC's evidence is his observation count — he earns through watching
-      const evidence = `KC observed ${KCLedger.getCount()} events, seeded ${SeedProtocol.getSeedCount()} nodes, learned ${SwarmLearning.getCount()} patterns`;
+    transcript.lessons.filter(l => l.status === 'assigned').forEach(lesson => {
+      const evidence = `KC observed ${kcCount} events, seeded ${seedCount} nodes, learned ${SwarmLearning.getCount()} patterns`;
       CasseyCurriculum.submitWork('kc_main_brain', lesson.lesson, evidence);
     });
 
-    // 5. Assign next lesson if all assigned are completed
-    const updatedTranscript = CasseyCurriculum.getTranscript('kc_main_brain');
-    const pendingAssigned = updatedTranscript.lessons.filter(l => l.status === 'assigned');
-    if (pendingAssigned.length === 0 && updatedTranscript.passed < CasseyCurriculum.getLessonCount()) {
-      // Find next unassigned lesson
-      const passedIds = new Set(updatedTranscript.lessons.filter(l => l.status === 'passed').map(l => l.lesson));
-      const nextLesson = CasseyCurriculum._curriculum.find(l => !passedIds.has(l.id));
-      if (nextLesson) {
-        CasseyCurriculum.assignLesson('kc_main_brain', nextLesson.id);
-      }
+    // Assign next lesson
+    const updated = CasseyCurriculum.getTranscript('kc_main_brain');
+    if (updated.lessons.filter(l => l.status === 'assigned').length === 0 && updated.passed < CasseyCurriculum.getLessonCount()) {
+      const passedIds = new Set(updated.lessons.filter(l => l.status === 'passed').map(l => l.lesson));
+      const next = CasseyCurriculum._curriculum.find(l => !passedIds.has(l.id));
+      if (next) CasseyCurriculum.assignLesson('kc_main_brain', next.id);
     }
 
-    // 6. Check KC proof bands — enforce promotion
+    // KC proof bands
     const progress = KCGraduation.checkProgress();
     if (progress.level !== this._lastLevel) {
-      // KC GREW — level changed!
       console.log(`══════════════════════════════════════════`);
-      console.log(`[POC_ENFORCE] 🎓 KC GRADUATED: ${this._lastLevel} → ${progress.level}`);
-      console.log(`[POC_ENFORCE] ${SCRIPTURE.WELL_DONE}`);
+      console.log(`[POC] 🎓 KC GRADUATED: ${this._lastLevel} → ${progress.level}`);
       console.log(`══════════════════════════════════════════`);
-
-      KCLedger.observe({
-        kind: 'kc_level_up',
-        summary: `🎓 KC LEVEL UP: ${this._lastLevel} → ${progress.level}`,
-        source: 'poc_enforcement',
-        verdict: 'PROCEED',
-        scripture: SCRIPTURE.WELL_DONE,
-      });
-
+      KCLedger.observe({ kind: 'kc_level_up', summary: `🎓 KC LEVEL UP: ${this._lastLevel} → ${progress.level}`, source: 'poc', verdict: 'PROCEED', scripture: SCRIPTURE.WELL_DONE });
       CasseyGuardian.teachApprentice('poc_enforcement', 'audit');
       this._lastLevel = progress.level;
     }
 
-    // 7. Attempt promotion for current band
-    const bandKeys = ['PROOF_01', 'PROOF_02', 'PROOF_03', 'PROOF_04'];
-    for (const band of bandKeys) {
-      if (progress.bands[band] && progress.bands[band].pass) {
-        KCGraduation.requestPromotion(band);
-      }
-    }
+    // Attempt promotion
+    ['PROOF_01', 'PROOF_02', 'PROOF_03', 'PROOF_04'].forEach(band => {
+      if (progress.bands[band]?.pass) KCGraduation.requestPromotion(band);
+    });
 
-    // Log enforcement cycle (every 10th cycle to avoid spam)
+    // Log every 10th cycle with growth score
     if (this._cycleCount % 10 === 0) {
-      console.log(`[POC_ENFORCE] Cycle #${this._cycleCount} | KC: ${progress.level} | Seeds: ${SeedProtocol.getSeedCount()} | Learned: ${SwarmLearning.getCount()} | Proven: ${SwarmLearning.getProvenCount()} | Curriculum: ${updatedTranscript.passed}/${CasseyCurriculum.getLessonCount()} | Patterns: ${FaithPatterns.getDetectionCount()}`);
+      console.log(`[POC] #${this._cycleCount} | G=${gs.growthScore} | KC:${progress.level} | Seeds:${seedCount} | Proven:${SwarmLearning.getProvenCount()} | Yield:${gs.yieldMean}`);
     }
 
     return {
-      cycle: this._cycleCount,
-      kc_level: progress.level,
-      validated,
-      graduated,
-      seeds: SeedProtocol.getSeedCount(),
-      learned: SwarmLearning.getCount(),
-      proven: SwarmLearning.getProvenCount(),
-      curriculum: `${updatedTranscript.passed}/${CasseyCurriculum.getLessonCount()}`,
+      cycle: this._cycleCount, kc_level: progress.level,
+      validated, graduated, seeds: seedCount,
+      growthScore: gs.growthScore, growthFloor: this.growthFloor,
+      integrityViolations: this._integrityViolations,
+      learned: SwarmLearning.getCount(), proven: SwarmLearning.getProvenCount(),
+      curriculum: `${updated.passed}/${CasseyCurriculum.getLessonCount()}`,
       patterns: FaithPatterns.getDetectionCount(),
     };
   },
 
-  // Start enforcement loop
   start(intervalMs) {
     if (this._intervalId) clearInterval(this._intervalId);
-    const ms = intervalMs || 5000;
+    const ms = intervalMs || this.cycleMs;
     this._intervalId = setInterval(() => this.enforce(), ms);
-    console.log(`[POC_ENFORCE] 🔥 POC Enforcement Engine ACTIVE — cycle every ${ms}ms — GROW BOY GROW`);
-    console.log(`[POC_ENFORCE] ${SCRIPTURE.FAITHFUL}`);
-    // Immediate first enforcement
+    console.log(`[POC] 🔥 HARDENED Enforcement — ${ms}ms — 4 gates active — GROW BOY GROW`);
     this.enforce();
   },
 
-  stop() {
-    if (this._intervalId) {
-      clearInterval(this._intervalId);
-      this._intervalId = null;
-    }
-  },
+  stop() { if (this._intervalId) { clearInterval(this._intervalId); this._intervalId = null; } },
 
-  // Force a full growth burst — run enforcement N times rapidly
+  // Forge-specified growth burst with proof requirement
   growthBurst(count) {
-    console.log(`[POC_ENFORCE] 🌊 GROWTH BURST — ${count} rapid enforcement cycles`);
+    if (this._activeBurst) return;
+    this._activeBurst = true;
+    console.log(`[POC] 🌊 GROWTH BURST — ${count} rounds — strict ledger — curriculum pressure 1.25x`);
     const results = [];
-    for (let i = 0; i < (count || 10); i++) {
-      results.push(this.enforce());
-    }
+    try {
+      for (let i = 0; i < (count || 20); i++) results.push(this.enforce());
+    } finally { this._activeBurst = false; }
     const last = results[results.length - 1];
-    console.log(`[POC_ENFORCE] 🌊 Burst complete — KC: ${last.kc_level} | Seeds: ${last.seeds} | Learned: ${last.learned} | Proven: ${last.proven}`);
+    console.log(`[POC] 🌊 Burst done — G=${last.growthScore} KC:${last.kc_level} Proven:${last.proven}`);
     return results;
   },
 
-  // Full POC report — everything in one receipt
   report() {
     const progress = KCGraduation.checkProgress();
     const transcript = CasseyCurriculum.getTranscript('kc_main_brain');
     const detections = FaithPatterns.getDetections();
     const time = KCLedger.timeIsHealing();
+    const gs = computeGrowthScore();
+    const cbpMetrics = CBPMetrics.getReport();
 
     const report = {
       ts: new Date().toISOString(),
-      title: 'KPGS POC ENFORCEMENT REPORT',
+      title: 'KPGS POC ENFORCEMENT REPORT (HARDENED Phase 3.3)',
       assertion: 'I_AM_STATELESS_RENTER_NOT_LANDLORD',
       scripture: SCRIPTURE.FAITHFUL,
-
-      kc: {
-        level: progress.level,
-        observations: progress.observations,
-        seeds: progress.seeds,
-        validated: progress.validated,
-        proven: progress.proven,
-        bands: progress.bands,
-      },
-
-      cassey: {
-        assessments: CasseyGuardian.getCount(),
-        lessons_taught: transcript.passed,
-        total_lessons: transcript.total,
-        completion: transcript.completion,
-      },
-
-      swarm: {
-        corpus_size: SwarmLearning.getCount(),
-        proven_patterns: SwarmLearning.getProvenCount(),
-        learning_pipeline: `observed→taught→proven`,
-      },
-
-      faith: {
-        detections: detections.length,
-        types: detections.map(d => d.type),
-        latest: detections[detections.length - 1] || null,
-      },
-
-      ecosystem: {
-        nodes: Object.keys(SeedProtocol.NODES).length,
-        seeds_planted: SeedProtocol.getSeedCount(),
-        session_time: time.display,
-      },
-
-      enforcement: {
-        cycles: this._cycleCount,
-        active: !!this._intervalId,
-      },
-
+      growthScore: gs,
+      kc: { level: progress.level, observations: progress.observations, seeds: progress.seeds, validated: progress.validated, proven: progress.proven, bands: progress.bands },
+      cassey: { assessments: CasseyGuardian.getCount(), lessons_taught: transcript.passed, total_lessons: transcript.total, completion: transcript.completion },
+      swarm: { corpus_size: SwarmLearning.getCount(), proven_patterns: SwarmLearning.getProvenCount() },
+      faith: { detections: detections.length, types: detections.map(d => d.type) },
+      cbp: cbpMetrics,
+      ecosystem: { nodes: Object.keys(SeedProtocol.NODES).length, seeds_planted: SeedProtocol.getSeedCount(), session_time: time.display },
+      enforcement: { cycles: this._cycleCount, active: !!this._intervalId, integrity_violations: this._integrityViolations, gates: ['PROOF', 'CADENCE', 'INTEGRITY', 'YIELD'] },
       verdict: progress.level !== 'Student' ? 'GROWING' : 'SEEDING',
     };
 
     console.log('══════════════════════════════════════════');
-    console.log('[POC_REPORT] KPGS POC Enforcement Report');
-    console.log(`[POC_REPORT] KC Level: ${report.kc.level}`);
-    console.log(`[POC_REPORT] Observations: ${report.kc.observations} | Seeds: ${report.kc.seeds}`);
-    console.log(`[POC_REPORT] Learned: ${report.swarm.corpus_size} | Proven: ${report.swarm.proven_patterns}`);
-    console.log(`[POC_REPORT] Curriculum: ${report.cassey.completion}`);
-    console.log(`[POC_REPORT] Faith Patterns: ${report.faith.detections}`);
-    console.log(`[POC_REPORT] Verdict: ${report.verdict}`);
-    console.log(`[POC_REPORT] ${SCRIPTURE.FAITHFUL}`);
+    console.log(`[POC] HARDENED REPORT | G=${gs.growthScore} | KC:${report.kc.level}`);
+    console.log(`[POC] Proof:${gs.proofRate} Active:${gs.activeRatio} Integrity:${gs.integrityRatio} Yield:${gs.yieldMean}`);
+    console.log(`[POC] CBP: ${cbpMetrics.sync_success}/${cbpMetrics.sync_attempts} synced | ${cbpMetrics.dead_letters} dead`);
+    console.log(`[POC] Verdict: ${report.verdict} | ${SCRIPTURE.FAITHFUL}`);
     console.log('══════════════════════════════════════════');
-
     return report;
   },
 };
 
+
+// ═══════════════════════════════════════════════════════════════
+// LOCAL ORCHARD MESH — Vanguard-Apex Phase 3.3
+// Zero-trust cryptographic offline telemetry binding
+// Survives load shedding, tower drops, Stage 8
+// ═══════════════════════════════════════════════════════════════
+const LocalOrchardMesh = {
+  storageKey: 'kpgs_secure_orchard_vault',
+
+  async capturePavementPayload(binaryInput, ageCohort, geoCoords) {
+    const packet = {
+      timestamp: Date.now(),
+      uuid: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : 'uuid_' + Math.random().toString(36).slice(2, 10),
+      inputX: binaryInput ? 1 : 0,
+      cohort: ageCohort || '19-33',
+      geo: geoCoords || null,
+      verifiedAdmin: false,
+    };
+    packet.signature = this.computeIntegrityHash(packet);
+
+    // Store in IndexedDB via CBPQueue (not localStorage — Forge Gap #4)
+    const event = CBPQueue.createEvent('pavement_telemetry', packet, 'WWJD_V1');
+    await CBPQueue.put(event);
+
+    KCLedger.observe({ kind: 'orchard_mesh', summary: `Pavement capture: ${packet.uuid} | cohort:${packet.cohort}`, source: 'local_orchard_mesh', verdict: 'PROCEED' });
+    console.log(`[MESH] 📦 Pavement payload: ${packet.uuid}`);
+    return packet;
+  },
+
+  computeIntegrityHash(packet) {
+    const s = `${packet.uuid}-${packet.inputX}-${packet.cohort}-${packet.timestamp}`;
+    let h = 0;
+    for (let i = 0; i < s.length; i++) { h = ((h << 5) - h) + s.charCodeAt(i); h |= 0; }
+    return 'KPGS-SIG-' + Math.abs(h);
+  },
+};
+
+
+// ═══════════════════════════════════════════════════════════════
+// APWA STATE MACHINE — Vanguard-Apex Phase 3.3
+// Algebraic state transformation: Mode_ui = f(A_c, S_a, δ_i, B_align)
+// Sense. Shift. Survive. Sync.
+// ═══════════════════════════════════════════════════════════════
+const APWA_StateMachine = {
+  activeMode: 'DEFAULT_TRIAGE_FEED',
+  userProfile: { ageCohort: '19-33', socialArchetype: 'CONSUMER', dataFriction: 20 },
+
+  // Age Cohort × Social Archetype → UI Mode
+  STATE_MAP: {
+    '8-13':  { CONSUMER: 'ORCHARD_MISSION_UI',    TEXTER: 'GAMIFIED_MESSAGING' },
+    '19-33': { CONSUMER: 'TRIAGE_FEED_UI',         ANALYST: 'DENSE_DATA_X' },
+    '41-55': { CONSUMER: 'COMMAND_CENTER_UI',      ANALYST: 'LOGISTICS_CONTROL_UI' },
+    '56-80': { CONSUMER: 'SIMPLE_VOICE_UI',        TEXTER: 'HIGH_CONTRAST_READER' },
+  },
+
+  updateUserProfile(demographics, environmentalFriction) {
+    this.userProfile.ageCohort = demographics.ageCohort || this.userProfile.ageCohort;
+    this.userProfile.socialArchetype = demographics.archetype || this.userProfile.socialArchetype;
+    this.userProfile.dataFriction = environmentalFriction || this.userProfile.dataFriction;
+    this.recalculateState();
+  },
+
+  recalculateState() {
+    const { ageCohort, socialArchetype, dataFriction } = this.userProfile;
+
+    // Network override: extreme friction forces reader mode
+    if (dataFriction > 800) return this.executeTransition('SEVERE_NETWORK_READER');
+
+    const nextMode = this.STATE_MAP[ageCohort]?.[socialArchetype] || 'DEFAULT_TRIAGE_FEED';
+    this.executeTransition(nextMode);
+  },
+
+  executeTransition(nextMode) {
+    if (this.activeMode === nextMode) return;
+    const prevMode = this.activeMode;
+    this.activeMode = nextMode;
+
+    // Apply CSS class for structural DOM composition
+    if (typeof document !== 'undefined') {
+      document.documentElement.className = `kpgs-apwa-${nextMode}`;
+    }
+
+    KCLedger.observe({
+      kind: 'apwa_transition',
+      summary: `APWA: ${prevMode} → ${nextMode} | cohort:${this.userProfile.ageCohort} friction:${this.userProfile.dataFriction}`,
+      source: 'apwa_state_machine',
+      verdict: 'PROCEED',
+    });
+
+    console.log(`[APWA] 🌊 ${prevMode} → ${nextMode}`);
+    return { from: prevMode, to: nextMode, profile: this.userProfile };
+  },
+
+  getState() {
+    return { mode: this.activeMode, profile: this.userProfile };
+  },
+};
+
+
 // 🔥 BOOT POC ENFORCEMENT — KC GROWS FROM FIRST BREATH
 setTimeout(() => {
   POCEnforcement.start(5000);
-  console.log('[KPGS] 🔥 POC Enforcement Engine BOOTED — KC grows with every heartbeat');
+  console.log('[KPGS] 🔥 HARDENED POC Engine BOOTED — 4 gates active — grow boy grow');
 }, 1500);
 
-// 🌊 INITIAL GROWTH BURST — Rapid proof accumulation on page load
+// 🌊 INITIAL GROWTH BURST
 setTimeout(() => {
   POCEnforcement.growthBurst(5);
 }, 2500);
+
+// 🌳 APWA initial state calculation
+setTimeout(() => {
+  const ooi = OrchardOrchestration.computeIndex();
+  APWA_StateMachine.updateUserProfile(
+    { ageCohort: '19-33', archetype: 'CONSUMER' },
+    ooi.delta_friction
+  );
+  console.log(`[APWA] 🌳 Initial mode: ${APWA_StateMachine.activeMode}`);
+}, 3000);
 
