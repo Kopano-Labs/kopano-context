@@ -429,6 +429,142 @@
       background: var(--bg-panel);
     }
     .game-footer .hl { color: var(--accent-identic); }
+
+    /* ═══════════════════════════════════════════════════════════════
+       SUPER-ADMIN GOD MODE & LOGIN GATE STYLES
+       ═══════════════════════════════════════════════════════════════ */
+    .login-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      width: 100%;
+      position: relative;
+      z-index: 10;
+      padding: 20px;
+    }
+    .login-container {
+      display: flex; gap: 32px; background: rgba(13, 13, 26, 0.9);
+      border: 1px solid rgba(123,97,255,0.3); border-radius: var(--radius);
+      padding: 36px; max-width: 800px; width: 90%;
+      box-shadow: 0 20px 80px rgba(0,0,0,0.8), 0 0 30px rgba(123,97,255,0.1);
+      backdrop-filter: blur(20px); transition: all 0.5s ease;
+      color: var(--text-primary);
+    }
+    @media (max-width: 680px) {
+      .login-container { flex-direction: column-reverse; align-items: center; }
+      .authenticator-phone { display: none !important; }
+    }
+    .login-card { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+    .login-title {
+      font-size: 22px; font-weight: 800; margin-bottom: 8px;
+      background: linear-gradient(135deg, #fff, var(--accent-identic), var(--accent-telemetry));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .login-input-group { margin-bottom: 14px; position: relative; }
+    .login-input-group label {
+      display: block; font-size: 10px; color: var(--text-secondary);
+      font-family: var(--mono); text-transform: uppercase; margin-bottom: 4px;
+    }
+    .login-input {
+      width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.5);
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      color: var(--text-primary); font-family: var(--mono); font-size: 13px;
+      outline: none; transition: all 0.3s;
+    }
+    .login-input:focus { border-color: var(--accent-identic); box-shadow: 0 0 10px rgba(123,97,255,0.2); }
+    .login-input::placeholder { color: var(--text-dim); }
+    .login-btn {
+      width: 100%; padding: 12px; border: none; border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, var(--accent-identic), var(--accent-guardian));
+      color: #fff; font-family: var(--font); font-size: 13px; font-weight: 700;
+      cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px;
+    }
+    .login-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(123,97,255,0.3); }
+    .login-btn:active { transform: translateY(0); }
+
+    /* Phone Simulator for 2FA TOTP */
+    .authenticator-phone {
+      width: 260px; height: 410px; background: #000;
+      border: 6px solid #252542; border-radius: 32px; position: relative;
+      display: flex; flex-direction: column; overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    }
+    .phone-screen {
+      flex: 1; padding: 20px; display: flex; flex-direction: column;
+      background: #090911; color: #fff; font-family: var(--font);
+    }
+    .phone-header {
+      font-size: 11px; color: var(--text-secondary); text-align: center;
+      margin-bottom: 24px; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .phone-title { font-size: 13px; font-weight: 700; margin-bottom: 2px; color: #fff; }
+    .phone-user { font-size: 9px; color: var(--text-secondary); margin-bottom: 20px; font-family: var(--mono); }
+    .totp-code-display {
+      font-size: 32px; font-weight: 800; color: #4285f4; text-align: center;
+      letter-spacing: 2px; font-family: var(--mono); margin: 20px 0;
+      text-shadow: 0 0 10px rgba(66,133,244,0.3);
+    }
+    .progress-ring-container {
+      margin: auto auto 10px; text-align: center;
+    }
+    .ring-timer {
+      font-size: 10px; font-family: var(--mono); color: var(--text-secondary);
+    }
+
+    /* SAGM Elite Overrides */
+    body.sagm-elite-active {
+      background: radial-gradient(circle at center, #100f28 0%, #05050b 100%) !important;
+    }
+    .sagm-elite-active .hud-header {
+      border-bottom: 2px solid var(--accent-gold) !important;
+      box-shadow: 0 0 35px rgba(212,175,55,0.15) !important;
+    }
+    .sagm-elite-active .hud-logo {
+      background: linear-gradient(135deg, var(--accent-gold), var(--accent-guardian)) !important;
+      box-shadow: 0 0 20px rgba(212,175,55,0.4) !important;
+      color: #000 !important; font-weight: 900;
+    }
+    
+    /* 5-Tier Observer Styles */
+    .elite-all-in-one {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px; margin: 20px;
+    }
+    .tier-box {
+      background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 16px; position: relative;
+      transition: all 0.3s;
+    }
+    .tier-box:hover {
+      border-color: var(--accent-gold); background: rgba(255,255,255,0.04);
+      box-shadow: 0 4px 20px rgba(212,175,55,0.1);
+    }
+    .tier-header {
+      font-size: 11px; font-weight: 700; color: var(--accent-gold); margin-bottom: 10px;
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;
+      font-family: var(--mono);
+    }
+    .tier-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 11px; }
+    .tier-label { color: var(--text-secondary); }
+    .tier-value { font-family: var(--mono); color: #fff; }
+
+    /* Override buttons for sync/desync */
+    .sagm-sync-panel {
+      background: rgba(13,13,22,0.8); border: 1px solid rgba(212,175,55,0.3);
+      border-radius: var(--radius-sm); padding: 18px; margin: 16px 20px;
+      display: flex; flex-direction: column; gap: 12px;
+      box-shadow: 0 0 20px rgba(212,175,55,0.05);
+    }
+    .sync-btn-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    }
+    @media (max-width: 600px) { .sync-btn-grid { grid-template-columns: 1fr 1fr; } }
+    .sync-status-indicator {
+      display: flex; align-items: center; gap: 6px; font-size: 11px; font-family: var(--mono);
+    }
   </style>
 </head>
 <body>
@@ -453,6 +589,7 @@
     tick_interval: null,
     selected_plot: null,
     feed_tab: 'hood',
+    cbp_queue_depth: 0,
     regions: [
       { id:"plot_kopano_context", kind:"hood_plot", domain:"context.kopanolabs.com", status:"active", lane:"kopano_context", landlord:"mirror_warden", agents:76, tel:23, idn:27, gua:25, sample:["mirror_warden","pipeline_drone","spawn_telemetry_002","spawn_telemetry_003","kc_apprentice","cassy"] },
       { id:"plot_kopanolabs_org", kind:"hood_plot", domain:"kopanolabs.com", status:"active", lane:"org_marketing", landlord:"operational_general", agents:75, tel:21, idn:25, gua:28, sample:["operational_general","spawn_telemetry_004","spawn_telemetry_005"] },
@@ -473,6 +610,17 @@
       { id:"20260614T150951", proceed:12, sever:0, size:12, results:[] }
     ],
     feed: []
+  };
+
+  // SAGM & TOTP Global States
+  let CURRENT_TOTP_CODE = 123456;
+  let totpInterval = null;
+  let totpTimeLeft = 30;
+  const SYNC_CHANNELS = {
+    cloud: true,
+    hardware: true,
+    software: true,
+    reality: true
   };
 
   // ══════════════════════════════════════════════════════════════
@@ -667,6 +815,13 @@
     const seedOut = SeedProtocol.seedOut(seedIn.id, `Tick ${tick.id}: ${proceed}/${results.length} PROCEED`);
     addFeedEntry('pip-swfus', `🌿 [SEED_OUT] Tick seeded ← CRUD validated | Receipt: ${seedOut.crud.create.output_hash}`, '');
 
+    // Accumulate CBP Queue Depth if any channel is desynced
+    if (!SYNC_CHANNELS.cloud || !SYNC_CHANNELS.hardware || !SYNC_CHANNELS.software || !SYNC_CHANNELS.reality) {
+      WORLD.cbp_queue_depth = (WORLD.cbp_queue_depth || 0) + Math.floor(Math.random() * 3) + 1;
+    } else {
+      WORLD.cbp_queue_depth = 0;
+    }
+
     // Animate cooking dots
     document.querySelectorAll('.a-dot').forEach(d => {
       d.classList.add('cooking');
@@ -793,12 +948,29 @@
   // RENDERING
   // ══════════════════════════════════════════════════════════════
   function render() {
+    const role = sessionStorage.getItem('kpgs_admin_role');
+    if (!role) {
+      document.getElementById('app').innerHTML = renderLoginGate();
+      startTotpGenerator();
+      attachLoginEvents();
+      return;
+    }
+
+    if (role === 'SAGM') {
+      document.body.classList.add('sagm-elite-active');
+    } else {
+      document.body.classList.remove('sagm-elite-active');
+    }
+
     document.getElementById('app').innerHTML = `
-      ${renderHud()}
+      ${renderHud(role)}
       ${renderSwfusStrip()}
+      
+      ${role === 'SAGM' ? renderSagmElitePanel() : ''}
+      
       <div class="main-layout">
         ${renderLeftSidebar()}
-        ${renderCenter()}
+        ${renderCenter(role)}
         ${renderRightSidebar()}
       </div>
       <div class="game-footer">
@@ -809,12 +981,265 @@
     attachEvents();
   }
 
-  function renderHud() {
+  function renderLoginGate() {
+    return `
+      <div class="login-wrapper">
+        <div class="login-container">
+          <div class="login-card">
+            <div class="login-logo" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+              <div class="hud-logo" style="background: linear-gradient(135deg, var(--accent-identic), var(--accent-guardian));">KS</div>
+              <div style="font-size: 11px; font-family: var(--mono); color: var(--accent-identic); font-weight: bold; letter-spacing: 1.5px;">ALTAR GATE GATEWAY</div>
+            </div>
+            <h2 class="login-title">Altar Gate Authentication</h2>
+            <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.5;">
+              Authenticate credentials to sync to the Sovereign Intelligence Platform. Jesus is King.
+            </p>
+            
+            <div class="login-input-group">
+              <label>Administrative Email</label>
+              <input type="email" id="loginEmail" placeholder="e.g. krrababalela@kopanolabs.com" class="login-input" oninput="handleEmailInput()" autocomplete="off">
+            </div>
+            
+            <div class="login-input-group">
+              <label>Administrative Password</label>
+              <input type="password" id="loginPassword" placeholder="Enter password..." class="login-input" autocomplete="off">
+            </div>
+            
+            <!-- SAGM Extended Gate -->
+            <div id="sagmFields" style="display: none; border-top: 1px dashed rgba(123,97,255,0.2); padding-top: 16px; margin-top: 16px;">
+              <div class="login-input-group">
+                <label style="color: var(--accent-gold);">Sovereign Secret Key</label>
+                <input type="password" id="loginSecretKey" placeholder="Enter John 3:16 secret key..." class="login-input" autocomplete="off">
+              </div>
+              
+              <div class="login-input-group">
+                <label style="color: var(--accent-gold);">Sovereign Secret Password</label>
+                <input type="password" id="loginSecretPassword" placeholder="Enter manual offline secret..." class="login-input" autocomplete="off">
+              </div>
+              
+              <div class="login-input-group">
+                <label style="color: #4285f4;">Microsoft Authenticator 2FA</label>
+                <input type="text" id="login2FA" placeholder="Enter 6-digit rolling code..." class="login-input" maxlength="6" autocomplete="off">
+              </div>
+            </div>
+            
+            <button class="login-btn" onclick="attemptLogin()" style="margin-top: 10px;">AUTHENTICATE GATE</button>
+            
+            <div id="loginStatus" style="margin-top: 16px; display: none; padding: 10px; border-radius: var(--radius-xs); font-family: var(--mono); font-size: 11px; text-align: center;"></div>
+          </div>
+          
+          <!-- Authenticator Phone Simulator -->
+          <div class="authenticator-phone" id="phoneSimulator" style="opacity: 0.15; transform: scale(0.95); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none;">
+            <div class="phone-screen">
+              <div style="display: flex; justify-content: space-between; font-size: 9px; color: var(--text-dim); margin-bottom: 14px; font-family: var(--mono);">
+                <span>12:15 PM</span>
+                <span>📶 🔋 98%</span>
+              </div>
+              <div class="phone-header">
+                <span style="font-size: 16px;">🔐</span>
+                <span>Microsoft Authenticator</span>
+              </div>
+              <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                <div class="phone-title">KopanoLabs Sovereign Portal</div>
+                <div class="phone-user">krrababalela@kopanolabs.com</div>
+                <div id="totpCodeDisplay" class="totp-code-display">000 000</div>
+                <div class="progress-ring-container">
+                  <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-bottom: 6px; overflow: hidden;">
+                    <div id="totpProgressBar" style="height: 100%; width: 100%; background: #4285f4; transition: width 1s linear;"></div>
+                  </div>
+                  <div class="ring-timer" id="ringTimer">30s</div>
+                </div>
+              </div>
+              <div style="font-size: 8px; color: var(--text-dim); text-align: center; font-family: var(--mono);">
+                SECURED BY KOPANO-PHU SYSTEM
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function handleEmailInput() {
+    const emailInput = document.getElementById('loginEmail');
+    const sagmFields = document.getElementById('sagmFields');
+    const phone = document.getElementById('phoneSimulator');
+    
+    if (emailInput && emailInput.value.trim().toLowerCase() === 'krrababalela@kopanolabs.com') {
+      sagmFields.style.display = 'block';
+      if (phone) {
+        phone.style.opacity = '1';
+        phone.style.transform = 'scale(1)';
+        phone.style.pointerEvents = 'auto';
+      }
+    } else {
+      if (sagmFields) sagmFields.style.display = 'none';
+      if (phone) {
+        phone.style.opacity = '0.15';
+        phone.style.transform = 'scale(0.95)';
+        phone.style.pointerEvents = 'none';
+      }
+    }
+  }
+
+  function attemptLogin() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
+    const statusDiv = document.getElementById('loginStatus');
+    
+    statusDiv.style.display = 'block';
+    statusDiv.style.background = 'rgba(233,69,96,0.1)';
+    statusDiv.style.border = '1px solid var(--accent-sever)';
+    statusDiv.style.color = 'var(--accent-sever)';
+    
+    if (!email || !password) {
+      statusDiv.textContent = '❌ WWJD FIREWALL: Email and password required.';
+      return;
+    }
+    
+    if (email.toLowerCase() === 'krrababalela@kopanolabs.com') {
+      const secretKey = document.getElementById('loginSecretKey').value.trim();
+      const secretPassword = document.getElementById('loginSecretPassword').value.trim();
+      const code2fa = document.getElementById('login2FA').value.trim().replace(/\s/g, '');
+      
+      if (password !== 'Itsrababalela1!.') {
+        statusDiv.textContent = '❌ WWJD FIREWALL: Incorrect password.';
+        return;
+      }
+      if (secretKey !== 'John3:16JesusIsKing') {
+        statusDiv.textContent = '❌ WWJD FIREWALL: Incorrect Sovereign Secret Key.';
+        return;
+      }
+      if (secretPassword !== 'JesusIsSeesAll100%') {
+        statusDiv.textContent = '❌ WWJD FIREWALL: Incorrect Sovereign Secret Password.';
+        return;
+      }
+      if (code2fa !== CURRENT_TOTP_CODE.toString()) {
+        statusDiv.textContent = '❌ WWJD FIREWALL: 2FA Authentication Failed.';
+        return;
+      }
+      
+      statusDiv.style.background = 'rgba(0,255,136,0.1)';
+      statusDiv.style.border = '1px solid var(--accent-proceed)';
+      statusDiv.style.color = 'var(--accent-proceed)';
+      statusDiv.textContent = '✅ Altar Gate Open. SAGM Elite Session Staging...';
+      
+      setTimeout(() => {
+        sessionStorage.setItem('kpgs_admin_role', 'SAGM');
+        KCLedger.observe({
+          kind: 'auth_success',
+          summary: 'SAGM User krrababalela@kopanolabs.com successfully authenticated via Altar Gate.',
+          source: 'altar_gate',
+          verdict: 'PROCEED',
+          scripture: '📖 "I am the gate; whoever enters through me will be saved." — John 10:9'
+        });
+        render();
+      }, 1000);
+      
+    } else if (email.toLowerCase() === 'rkholofelo@kopanolabs.com') {
+      if (password !== 'Itsrababalela1!.') {
+        statusDiv.textContent = '❌ WWJD FIREWALL: Incorrect password.';
+        return;
+      }
+      
+      statusDiv.style.background = 'rgba(0,255,136,0.1)';
+      statusDiv.style.border = '1px solid var(--accent-proceed)';
+      statusDiv.style.color = 'var(--accent-proceed)';
+      statusDiv.textContent = '✅ Altar Gate Open. Redirecting to Super Admin console...';
+      
+      setTimeout(() => {
+        sessionStorage.setItem('kpgs_admin_role', 'SUPER_ADMIN');
+        KCLedger.observe({
+          kind: 'auth_success',
+          summary: 'Super Admin rkholofelo@kopanolabs.com successfully authenticated.',
+          source: 'altar_gate',
+          verdict: 'PROCEED',
+          scripture: '📖 "Test everything; hold fast what is good." — 1 Thess 5:21'
+        });
+        render();
+      }, 1000);
+    } else {
+      statusDiv.textContent = '❌ WWJD FIREWALL: Administrative identity rejected.';
+    }
+  }
+
+  function attachLoginEvents() {
+    const passwordInput = document.getElementById('loginPassword');
+    const codeInput = document.getElementById('login2FA');
+    const emailInput = document.getElementById('loginEmail');
+    
+    if (passwordInput) {
+      passwordInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') attemptLogin();
+      });
+    }
+    if (codeInput) {
+      codeInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') attemptLogin();
+      });
+    }
+  }
+
+  function logoutAdmin() {
+    sessionStorage.removeItem('kpgs_admin_role');
+    if (totpInterval) {
+      clearInterval(totpInterval);
+      totpInterval = null;
+    }
+    document.body.classList.remove('sagm-elite-active');
+    render();
+  }
+
+  function startTotpGenerator() {
+    if (totpInterval) clearInterval(totpInterval);
+    generateNewTotp();
+    totpTimeLeft = 30;
+    updateTotpUI();
+    totpInterval = setInterval(() => {
+      totpTimeLeft--;
+      if (totpTimeLeft <= 0) {
+        generateNewTotp();
+        totpTimeLeft = 30;
+      }
+      updateTotpUI();
+    }, 1000);
+  }
+
+  function generateNewTotp() {
+    CURRENT_TOTP_CODE = Math.floor(100000 + Math.random() * 900000);
+  }
+
+  function updateTotpUI() {
+    const display = document.getElementById('totpCodeDisplay');
+    const timerText = document.getElementById('ringTimer');
+    const progressBar = document.getElementById('totpProgressBar');
+    
+    if (display) {
+      const codeStr = CURRENT_TOTP_CODE.toString();
+      display.textContent = codeStr.slice(0, 3) + ' ' + codeStr.slice(3);
+    }
+    if (timerText) {
+      timerText.textContent = `${totpTimeLeft}s`;
+    }
+    if (progressBar) {
+      const pct = (totpTimeLeft / 30) * 100;
+      progressBar.style.width = `${pct}%`;
+    }
+  }
+
+  function renderHud(role) {
+    const isSagm = role === 'SAGM';
+    const logoName = isSagm ? 'SG' : 'KS';
+    const titleText = isSagm ? 'Kopano Sovereign SIM — SAGM ELITE' : 'Kopano Sovereign SIM';
+    const roleBadge = isSagm 
+      ? '<span class="hud-badge" style="background:rgba(212,175,55,0.15); color:var(--accent-gold); border:1px solid rgba(212,175,55,0.3)">● SAGM Elite Mode</span>' 
+      : '<span class="hud-badge" style="background:rgba(123,97,255,0.1); color:var(--accent-identic); border:1px solid rgba(123,97,255,0.25)">● Super Admin</span>';
+      
     return `<div class="hud-header">
       <div class="hud-left">
-        <div class="hud-logo">KS</div>
+        <div class="hud-logo">${logoName}</div>
         <div>
-          <div class="hud-title">Kopano Sovereign SIM</div>
+          <div class="hud-title">${titleText}</div>
           <div class="hud-bracket">[SWFUS_KPGS] thesis_sector_matrix + infinite_hood</div>
         </div>
       </div>
@@ -826,7 +1251,8 @@
         <div class="hud-stat"><div class="hud-stat-val" style="color:var(--accent-identic)">${WORLD.tick_count}</div><div class="hud-stat-lbl">Ticks</div></div>
       </div>
       <div class="hud-right">
-        <span class="hud-badge badge-allow">● gate allow</span>
+        ${roleBadge}
+        <span class="hud-badge badge-allow" style="cursor:pointer;" onclick="logoutAdmin()" title="Log out session">● LOGOUT</span>
         <span class="hud-badge badge-tick">● ${WORLD.ticks[0]?.sever===0?'tick ok':'tick fail'}</span>
         <span class="hud-badge badge-pass">● poc pass</span>
       </div>
@@ -886,8 +1312,11 @@
     </div>`;
   }
 
-  function renderCenter() {
+  function renderCenter(role) {
+    const isSagm = role === 'SAGM';
+    const cbpIndicator = isSagm ? `<div style="padding:8px 20px; background:rgba(0,170,255,0.06); font-size:10px; font-family:var(--mono); border-bottom: 1px solid var(--border); display:flex; justify-content:space-between; align-items:center;"><span>CBP Queue Status: <span style="font-weight:bold; color:${WORLD.cbp_queue_depth > 0 ? 'var(--accent-sever)' : 'var(--accent-proceed)'};">${WORLD.cbp_queue_depth || 0} items buffered</span></span><span style="color:${SYNC_CHANNELS.cloud ? 'var(--accent-proceed)' : 'var(--accent-gold)'}; font-weight:bold;">${SYNC_CHANNELS.cloud ? 'ONLINE SYNC' : 'OFFLINE INGRESS BUFFERING'}</span></div>` : '';
     return `<div class="center-game">
+      ${cbpIndicator}
       <div class="dispatch-console">
         <div class="console-row">
           <input id="dispatchInput" class="console-input" placeholder="[GUI_TOKEN] dispatch message through SWFUS..." onkeydown="if(event.key==='Enter')handleDispatch()">
@@ -1007,6 +1436,229 @@
     WORLD.selected_plot = WORLD.selected_plot === id ? null : id;
     const el = document.getElementById('feedContent');
     if (el && WORLD.feed_tab === 'hood') el.innerHTML = renderHoodGrid();
+  }
+
+  function renderSagmElitePanel() {
+    const queueDepth = WORLD.cbp_queue_depth || 0;
+    const isMeshConnected = SYNC_CHANNELS.cloud && SYNC_CHANNELS.hardware && SYNC_CHANNELS.software && SYNC_CHANNELS.reality;
+    const meshStatusText = isMeshConnected ? 'COUPLED' : 'PARTIAL DESYNC';
+    const meshColor = isMeshConnected ? 'var(--accent-proceed)' : 'var(--accent-gold)';
+
+    return `
+      <!-- SAGM SOVEREIGN OVERRIDES -->
+      <div class="sagm-sync-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h4 style="color:var(--accent-gold); font-family:var(--mono); font-size:12px; font-weight:700; display:flex; align-items:center; gap:8px;">
+            👑 SAGM SOVEREIGN OVERRIDES (Sync & Desync Channels)
+          </h4>
+          <div class="sync-status-indicator">
+            <span style="font-size:9px; color:var(--text-dim); font-family:var(--mono);">ORCHARD COUPLING:</span>
+            <span id="meshCouplingState" style="color:${meshColor}; font-weight:bold;">${meshStatusText}</span>
+          </div>
+        </div>
+        <div class="sync-btn-grid">
+          <button class="console-btn" id="btnSyncCloud" onclick="toggleSyncChannel('cloud')" style="${getSyncStyle('cloud')}">
+            ☁️ Cloud: ${SYNC_CHANNELS.cloud ? 'SYNCED' : 'DESYNCED'}
+          </button>
+          <button class="console-btn" id="btnSyncHardware" onclick="toggleSyncChannel('hardware')" style="${getSyncStyle('hardware')}">
+            🔌 Hardware: ${SYNC_CHANNELS.hardware ? 'SYNCED' : 'DESYNCED'}
+          </button>
+          <button class="console-btn" id="btnSyncSoftware" onclick="toggleSyncChannel('software')" style="${getSyncStyle('software')}">
+            💾 Software: ${SYNC_CHANNELS.software ? 'SYNCED' : 'DESYNCED'}
+          </button>
+          <button class="console-btn" id="btnSyncReality" onclick="toggleSyncChannel('reality')" style="${getSyncStyle('reality')}">
+            🌌 Reality: ${SYNC_CHANNELS.reality ? 'SYNCED' : 'DESYNCED'}
+          </button>
+        </div>
+      </div>
+
+      <!-- 5-TIER ORCHARD SWARM OBSERVER -->
+      <div class="section-label" style="margin: 0 20px;">5-Tier Swarm Observer Interface</div>
+      <div class="elite-all-in-one">
+        <!-- Tier 0: Sovereign -->
+        <div class="tier-box">
+          <div class="tier-header">
+            <span>Tier 0: Sovereign</span>
+            <span style="color:var(--accent-gold);">● Elite</span>
+          </div>
+          <div class="tier-row">
+            <span class="tier-label">Master Robyn:</span>
+            <span class="tier-value" style="color:var(--accent-gold);">Robyn</span>
+          </div>
+          <div class="tier-row">
+            <span class="tier-label">Directives:</span>
+            <span class="tier-value">3 Active</span>
+          </div>
+          <div class="tier-row">
+            <span class="tier-label">Law Status:</span>
+            <span class="tier-value">ESTABLISHED</span>
+          </div>
+          <div class="tier-row">
+            <span class="tier-label">Sync Auth:</span>
+            <span class="tier-value">100%</span>
+          </div>
+        </div>
+
+        <!-- Tier 1: Core -->
+        <div class="tier-box">
+          <div class="tier-header">
+            <span>Tier 1: Core</span>
+            <span style="color:var(--accent-swfus);">● Active</span>
+          </div>
+          <div class="tier-row">
+            <span class="tier-label">Ledger Ratios:</span>
+            <span class="tier-value">99.8% Compliance</span>
+          </div>
+          <div class="tier-row">
+            <span class="tier-label">Apprentice:</span>
+            <span class="tier-value">GRADUATING</span>
+          </div>
+          <div class="tier-row">
+            <span class="tier-label">Teacher Audit:</span>
+            <span class="tier-value" style="color:var(--accent-proceed);">PASSING</span>
+          </div>
+          <div class="tier-row">
+            <span class="tier-label">Curriculum:</span>
+            <span class="tier-value">Cassey Level 4</span>
+          </div>
+        </div>
+
+        <!-- Tier 2: Field -->
+        <div class="tier-box">
+          <div class="tier-header">
+            <span>Tier 2: Field</span>
+            <span style="color:var(--accent-telemetry);">● Active</span>
+          </div>
+          <div class="tier-row">
+            <span class="tier-label">Agri (Freddy):</span>
+            <span class="tier-value">pH 6.8 · Alfalfa</span>
+          </div>
+          <div class="tier-row">
+            <span class="tier-label">Mining (Eddie):</span>
+            <span class="tier-value">BGF Mine Sync</span>
+          </div>
+          <div class="tier-row">
+            <span class="tier-label">Geospatial Latency:</span>
+            <span class="tier-value">4.1ms</span>
+          </div>
+          <div class="tier-row">
+            <span class="tier-label">Field Renter Nodes:</span>
+            <span class="tier-value">2 Active</span>
+          </div>
+        </div>
+
+        <!-- Tier 3: Ingress -->
+        <div class="tier-box">
+          <div class="tier-header">
+            <span>Tier 3: Ingress</span>
+            <span style="${queueDepth > 0 ? 'color:var(--accent-sever)' : 'color:var(--accent-proceed)'}">● ${queueDepth > 0 ? 'Spillover' : 'Durable'}</span>
+          </div>
+          <div class="tier-row">
+            <span class="tier-label">Queue Depth:</span>
+            <span class="tier-value" style="${queueDepth > 0 ? 'color:var(--accent-sever); font-weight:bold;' : 'color:var(--accent-proceed);'}">${queueDepth}</span>
+          </div>
+          <div class="tier-row">
+            <span class="tier-label">Sync Pipeline:</span>
+            <span class="tier-value">${SYNC_CHANNELS.cloud ? 'ONLINE' : 'OFFLINE BUFFER'}</span>
+          </div>
+          <div class="tier-row">
+            <span class="tier-label">Endpoint:</span>
+            <span class="tier-value" style="color:var(--accent-swfus);">/api/v1/telemetry</span>
+          </div>
+          <div class="tier-row">
+            <span class="tier-label">Signature Check:</span>
+            <span class="tier-value">VALIDATED</span>
+          </div>
+        </div>
+
+        <!-- Tier 4: Edge -->
+        <div class="tier-box">
+          <div class="tier-header">
+            <span>Tier 4: Edge</span>
+            <span style="color:var(--accent-identic);">● PWA</span>
+          </div>
+          <div class="tier-row">
+            <span class="tier-label">Bandwidth State:</span>
+            <span class="tier-value">${SYNC_CHANNELS.cloud ? 'MISSION-GRADE' : 'LOW-BANDWIDTH'}</span>
+          </div>
+          <div class="tier-row">
+            <span class="tier-label">Offline Adapt:</span>
+            <span class="tier-value" style="color:var(--accent-gold);">${SYNC_CHANNELS.cloud ? 'ONLINE SYNC' : 'OFFLINE BUFF'}</span>
+          </div>
+          <div class="tier-row">
+            <span class="tier-label">Local Storage:</span>
+            <span class="tier-value">0.12s Friction</span>
+          </div>
+          <div class="tier-row">
+            <span class="tier-label">Edge Node:</span>
+            <span class="tier-value">APWA Active</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function getSyncStyle(channel) {
+    const active = SYNC_CHANNELS[channel];
+    if (channel === 'cloud') {
+      return active 
+        ? 'background:rgba(0,170,255,0.15); border:2px solid var(--accent-swfus); color:var(--accent-swfus); text-shadow:0 0 4px var(--accent-swfus);'
+        : 'background:rgba(255,51,102,0.1); border:1px solid var(--text-dim); color:var(--text-dim);';
+    } else if (channel === 'hardware') {
+      return active
+        ? 'background:rgba(0,255,136,0.15); border:2px solid var(--accent-proceed); color:var(--accent-proceed); text-shadow:0 0 4px var(--accent-proceed);'
+        : 'background:rgba(255,51,102,0.1); border:1px solid var(--text-dim); color:var(--text-dim);';
+    } else if (channel === 'software') {
+      return active
+        ? 'background:rgba(123,97,255,0.15); border:2px solid var(--accent-identic); color:var(--accent-identic); text-shadow:0 0 4px var(--accent-identic);'
+        : 'background:rgba(255,51,102,0.1); border:1px solid var(--text-dim); color:var(--text-dim);';
+    } else if (channel === 'reality') {
+      return active
+        ? 'background:rgba(233,69,96,0.15); border:2px solid var(--accent-guardian); color:var(--accent-guardian); text-shadow:0 0 4px var(--accent-guardian);'
+        : 'background:rgba(255,51,102,0.1); border:1px solid var(--text-dim); color:var(--text-dim);';
+    }
+  }
+
+  function toggleSyncChannel(channel) {
+    SYNC_CHANNELS[channel] = !SYNC_CHANNELS[channel];
+    
+    let pip = SYNC_CHANNELS[channel] ? 'pip-proceed' : 'pip-sever';
+    let badge = SYNC_CHANNELS[channel] ? 'SYNC_ON' : 'SYNC_OFF';
+    let msg = '';
+    
+    if (channel === 'cloud') {
+      msg = SYNC_CHANNELS.cloud
+        ? '🌱 [SAGM_OVERRIDE] Cloud channel coupled. Synchronizing with Sovereign Platform.'
+        : '❌ [SAGM_OVERRIDE] Cloud channel desynchronized. Offline ingress buffers activated.';
+    } else if (channel === 'hardware') {
+      msg = SYNC_CHANNELS.hardware
+        ? '🌱 [SAGM_OVERRIDE] Hardware channel coupled. Real-time sensor arrays online.'
+        : '❌ [SAGM_OVERRIDE] Hardware channel uncoupled. Isolated mesh telemetry enabled.';
+    } else if (channel === 'software') {
+      msg = SYNC_CHANNELS.software
+        ? '🌱 [SAGM_OVERRIDE] Software channel bound. MMAO ledger sync established.'
+        : '❌ [SAGM_OVERRIDE] Software channel unbound. Local buffer decoupling triggered.';
+    } else if (channel === 'reality') {
+      msg = SYNC_CHANNELS.reality
+        ? '🌱 [SAGM_OVERRIDE] Reality channel synchronized. Scripture-bound state holds.'
+        : '❌ [SAGM_OVERRIDE] Reality channel desynchronized. Isolation mode. "Jesus Christ is the same yesterday today and forever."';
+    }
+    
+    addFeedEntry(pip, msg, badge);
+    
+    let btnId = '';
+    if (channel === 'cloud') btnId = 'btnSyncCloud';
+    if (channel === 'hardware') btnId = 'btnSyncHardware';
+    if (channel === 'software') btnId = 'btnSyncSoftware';
+    if (channel === 'reality') btnId = 'btnSyncReality';
+    
+    const btn = document.getElementById(btnId);
+    if (btn) {
+      const r = btn.getBoundingClientRect();
+      spawnParticles(r.left + r.width/2, r.top, SYNC_CHANNELS[channel] ? '#ffd700' : '#ff3366', 15);
+    }
+    
+    render();
   }
 
   function attachEvents() {

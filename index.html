@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kopano Context — Sovereign Intelligence Platform</title>
   <meta name="description" content="Kopano Context: sovereign data governance, AI apprenticeship, and offline-first intelligence for Africa and beyond.">
+  <link rel="manifest" href="manifest.json">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -244,6 +245,164 @@
       .section { padding: 60px 20px; }
       .kc-tracker { gap: 16px; }
     }
+
+    /* ═══════════════════════════════════════════════════════════════
+       APWA CLASS OVERRIDES & DASHBOARD STYLES
+       ═══════════════════════════════════════════════════════════════ */
+    .dashboard-section {
+      background: #090916; color: #c8c8e0; padding: 60px 40px;
+      font-family: var(--font); border-top: 2px solid rgba(123,97,255,0.3);
+      position: relative; z-index: 10;
+    }
+    .db-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px; max-width: 1200px; margin: 0 auto 30px;
+    }
+    .db-card {
+      background: rgba(255,255,255,0.02); border: 1px solid rgba(123,97,255,0.15);
+      border-radius: var(--radius-sm); padding: 20px; transition: all 0.3s;
+    }
+    .db-card:hover {
+      border-color: var(--accent); background: rgba(255,255,255,0.04);
+      box-shadow: 0 4px 20px rgba(123,97,255,0.15);
+    }
+    .db-title {
+      font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .db-metric {
+      font-family: var(--mono); font-size: 20px; font-weight: 700; color: var(--accent2);
+      margin-bottom: 10px; text-shadow: 0 0 10px rgba(0,212,170,0.2);
+    }
+    .db-label { font-size: 11px; color: var(--text-dim); }
+    .db-value { font-family: var(--mono); font-size: 12px; color: #fff; }
+    .db-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 12px; }
+    .db-btn {
+      width: 100%; padding: 8px 16px; border-radius: 8px; border: none;
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      color: #fff; font-family: var(--font); font-size: 11px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s; margin-top: 8px;
+    }
+    .db-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .db-btn-alt {
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+      color: #c8c8e0; width: auto; margin-top: 0;
+    }
+    .db-btn-alt:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .status-indicator {
+      width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+    }
+    .status-ok { background: #00ff88; box-shadow: 0 0 8px #00ff88; }
+    .status-warn { background: #ffd700; box-shadow: 0 0 8px #ffd700; }
+    .status-err { background: #ff3366; box-shadow: 0 0 8px #ff3366; }
+
+    /* APWA VIEWS (EXCLUSIVE BLOCKS) */
+    .apwa-views-area {
+      max-width: 1200px; margin: 0 auto; padding: 20px 40px;
+    }
+    .apwa-view-overlay {
+      display: none; background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(123,97,255,0.25); border-radius: var(--radius);
+      padding: 30px; margin-bottom: 40px; backdrop-filter: blur(10px);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    }
+    
+    /* Toggle visibility of specialized APWA views */
+    .kpgs-apwa-SIMPLE_VOICE_UI .apwa-view-voice { display: block; }
+    .kpgs-apwa-COMMAND_CENTER_UI .apwa-view-command { display: block; }
+    .kpgs-apwa-LOGISTICS_CONTROL_UI .apwa-view-logistics { display: block; }
+    .kpgs-apwa-DENSE_DATA_X .apwa-view-dense { display: block; }
+    .kpgs-apwa-ORCHARD_MISSION_UI .apwa-view-orchard { display: block; }
+    .kpgs-apwa-SEVERE_NETWORK_READER .apwa-view-reader { display: block; }
+
+    /* SIMPLE_VOICE_UI (Visual voice orb) */
+    .voice-orb-container { text-align: center; padding: 20px 0; }
+    .voice-orb {
+      width: 140px; height: 140px; border-radius: 50%;
+      background: radial-gradient(circle, var(--accent3) 20%, rgba(233,69,96,0.3) 70%);
+      margin: 20px auto; cursor: pointer; position: relative;
+      animation: orb-glowing 2s infinite ease-in-out;
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+    @keyframes orb-glowing {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(233,69,96,0.4), inset 0 0 15px rgba(255,255,255,0.3); }
+      50% { transform: scale(1.08); box-shadow: 0 0 40px rgba(233,69,96,0.8), inset 0 0 25px rgba(255,255,255,0.5); }
+    }
+    .voice-transcript {
+      background: rgba(0,0,0,0.3); padding: 16px; border-radius: var(--radius-sm);
+      font-size: 15px; color: #fff; font-style: italic; max-width: 500px; margin: 20px auto 0;
+      border: 1px solid rgba(255,255,255,0.06); text-align: center;
+    }
+
+    /* COMMAND_CENTER_UI (Tactical HUD) */
+    .hud-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+    @media (max-width: 768px) { .hud-grid { grid-template-columns: 1fr; } }
+    .hud-panel {
+      background: rgba(0,212,170,0.02); border: 1px solid rgba(0,212,170,0.3);
+      border-radius: var(--radius-sm); padding: 20px; font-family: var(--mono);
+    }
+    .hud-console {
+      background: #000; border: 1px solid rgba(0,212,170,0.5);
+      color: #00ffaa; padding: 12px; height: 180px; overflow-y: auto;
+      font-size: 11px; border-radius: 6px;
+    }
+
+    /* LOGISTICS_CONTROL_UI */
+    .logistics-table {
+      width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;
+    }
+    .logistics-table th {
+      padding: 10px; background: rgba(123,97,255,0.15); border: 1px solid rgba(123,97,255,0.3);
+      color: #fff; font-weight: 700;
+    }
+    .logistics-table td {
+      padding: 10px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02);
+    }
+
+    /* DENSE_DATA_X */
+    .dense-scroll {
+      height: 350px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.15);
+      background: #030308; border-radius: var(--radius-sm); padding: 12px;
+    }
+
+    /* ORCHARD_MISSION_UI */
+    .orchard-tree-visual {
+      display: flex; justify-content: space-around; align-items: flex-end;
+      height: 250px; background: rgba(0,255,136,0.02); border: 1px solid rgba(0,255,136,0.2);
+      border-radius: var(--radius-sm); padding: 20px; overflow: hidden; position: relative;
+    }
+    .orchard-branch {
+      text-align: center; z-index: 2; display: flex; flex-direction: column; align-items: center;
+    }
+    .orchard-branch-stem {
+      width: 8px; background: linear-gradient(180deg, #00ff88, #004d26);
+      border-radius: 4px; transition: height 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .orchard-leaf {
+      width: 24px; height: 24px; border-radius: 50% 0; background: #00ff88;
+      box-shadow: 0 0 10px #00ff88; transform: rotate(-45deg); margin-bottom: 8px;
+    }
+
+    /* SEVERE_NETWORK_READER (Extreme fallback plain text) */
+    .plain-text-reader {
+      background: #fff; color: #000; font-family: Georgia, serif;
+      padding: 40px; border-radius: 4px; box-shadow: none; border: 3px solid #000;
+    }
+    .plain-text-reader h2 { font-size: 28px; margin-bottom: 20px; font-family: var(--font); font-weight: 800; border-bottom: 2px solid #000; padding-bottom: 6px; }
+    .plain-text-reader p { font-size: 16px; line-height: 1.8; margin-bottom: 20px; }
+
+    /* Hide standard site wrappers if not in default mode */
+    html:not(.kpgs-apwa-TRIAGE_FEED_UI):not([class=""]) nav,
+    html:not(.kpgs-apwa-TRIAGE_FEED_UI):not([class=""]) .hero,
+    html:not(.kpgs-apwa-TRIAGE_FEED_UI):not([class=""]) #pillars,
+    html:not(.kpgs-apwa-TRIAGE_FEED_UI):not([class=""]) #products,
+    html:not(.kpgs-apwa-TRIAGE_FEED_UI):not([class=""]) #altar,
+    html:not(.kpgs-apwa-TRIAGE_FEED_UI):not([class=""]) .cta-section,
+    html:not(.kpgs-apwa-TRIAGE_FEED_UI):not([class=""]) #ecosystem,
+    html:not(.kpgs-apwa-TRIAGE_FEED_UI):not([class=""]) footer {
+      display: none !important;
+    }
   </style>
 </head>
 <body>
@@ -470,6 +629,288 @@
     </div>
   </section>
 
+  <!-- APWA SPECIALIZED OVERLAY VIEWS -->
+  <div class="apwa-views-area">
+    <!-- Voice UI Overlay -->
+    <div class="apwa-view-overlay apwa-view-voice">
+      <h2 style="color:var(--accent3);">🎙️ Simple Voice Assistant</h2>
+      <p style="color:var(--text-dim); margin-bottom: 20px;">Demographic: Cohort 56-80 Consumer (Simplified Voice-Only Access)</p>
+      <div class="voice-orb-container">
+        <div class="voice-orb" id="apwaVoiceOrb"></div>
+        <p style="font-size: 13px; color: #fff;">Click the orb to speak a command</p>
+      </div>
+      <div class="voice-transcript" id="voiceTranscript">
+        "Listening... Click the orb to speak."
+      </div>
+    </div>
+
+    <!-- Command Center HUD -->
+    <div class="apwa-view-overlay apwa-view-command">
+      <h2 style="color:var(--accent2); margin-bottom: 20px;">🛡️ Tactical Command HUD — 300 Swarm Agents</h2>
+      <div class="hud-grid">
+        <div class="hud-panel">
+          <div style="font-weight: 700; margin-bottom: 10px; color:#fff;">LIVE DEPLOYMENT STREAM</div>
+          <div class="hud-console" id="hudConsole">
+            [SYS_INIT] 300 agents loaded...<br>
+            [SEC_ZTNA] Posture verified via Netskope SASE...<br>
+            [ALTAR_OK] Nehemiah Gate pass...
+          </div>
+        </div>
+        <div class="hud-panel" style="border-color: var(--accent3);">
+          <div style="font-weight: 700; margin-bottom: 10px; color:#fff;">TACTICAL ALIGNMENT</div>
+          <div style="margin-bottom: 10px;">
+            <span class="db-label">WWJD Boundary:</span> <span style="color:#00ff88; font-weight:700;">ENFORCED</span>
+          </div>
+          <div style="margin-bottom: 10px;">
+            <span class="db-label">Camp Holiness:</span> <span style="color:#00ff88; font-weight:700;">HOLY</span>
+          </div>
+          <div style="margin-bottom: 10px;">
+            <span class="db-label">Threat Index:</span> <span style="color:#ff3366; font-weight:700;">0.00%</span>
+          </div>
+          <button class="db-btn" onclick="hudConsoleAction('ping')">Ping Swarm</button>
+          <button class="db-btn db-btn-alt" onclick="hudConsoleAction('clear')">Clear Logs</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Logistics Control Grid -->
+    <div class="apwa-view-overlay apwa-view-logistics">
+      <h2 style="color:var(--accent); margin-bottom: 20px;">🚚 Logistics Control Node — KasiLink + Harvest</h2>
+      <table class="logistics-table">
+        <thead>
+          <tr>
+            <th>Route ID</th>
+            <th>Ingress Layer</th>
+            <th>Compliance</th>
+            <th>Shedding Status</th>
+            <th>Telemetry Code</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>RT-KASILINK-01</td>
+            <td>Water (Gigs)</td>
+            <td><span style="color:#00ff88;">100% OK</span></td>
+            <td>Normal (Stage 0)</td>
+            <td><code style="color:var(--accent-light);">kpgs_c28f1</code></td>
+          </tr>
+          <tr>
+            <td>RT-HARVEST-04</td>
+            <td>Soil (Agri)</td>
+            <td><span style="color:#ffd700;">85% WARN</span></td>
+            <td>Grief Load lane</td>
+            <td><code style="color:var(--accent-light);">kpgs_b89a3</code></td>
+          </tr>
+          <tr>
+            <td>RT-CRISIS-FF</td>
+            <td>Fire (Rescue)</td>
+            <td><span style="color:#00ff88;">100% OK</span></td>
+            <td>Stage 8 Bypass</td>
+            <td><code style="color:var(--accent-light);">kpgs_e2a39</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Dense Data X Tabular View -->
+    <div class="apwa-view-overlay apwa-view-dense">
+      <h2 style="color:var(--gold); margin-bottom: 15px;">📊 Dense Data X Grid — Telemetry Buffer</h2>
+      <div class="dense-scroll">
+        <table class="logistics-table" id="denseDataTable" style="font-family:var(--mono); font-size:11px;">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Source</th>
+              <th>Type</th>
+              <th>Payload Hash</th>
+              <th>WWJD Verdict</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Populated via Javascript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Orchard Mission tree visualizer -->
+    <div class="apwa-view-overlay apwa-view-orchard">
+      <h2 style="color:#00ff88; margin-bottom: 20px;">🌳 Orchard Mission Matrix — Swarm Growth</h2>
+      <div class="orchard-tree-visual">
+        <div class="orchard-branch">
+          <div class="orchard-leaf"></div>
+          <div class="orchard-branch-stem" id="stem-plant" style="height: 40px;"></div>
+          <div class="db-label">PLANT</div>
+        </div>
+        <div class="orchard-branch">
+          <div class="orchard-leaf" style="background:#00d4aa; box-shadow:0 0 10px #00d4aa;"></div>
+          <div class="orchard-branch-stem" id="stem-water" style="height: 60px; background:#00d4aa;"></div>
+          <div class="db-label">WATER</div>
+        </div>
+        <div class="orchard-branch">
+          <div class="orchard-leaf" style="background:#7b61ff; box-shadow:0 0 10px #7b61ff;"></div>
+          <div class="orchard-branch-stem" id="stem-prune" style="height: 50px; background:#7b61ff;"></div>
+          <div class="db-label">PRUNE</div>
+        </div>
+        <div class="orchard-branch">
+          <div class="orchard-leaf" style="background:#ffd700; box-shadow:0 0 10px #ffd700;"></div>
+          <div class="orchard-branch-stem" id="stem-harvest" style="height: 80px; background:#ffd700;"></div>
+          <div class="db-label">HARVEST</div>
+        </div>
+        <div class="orchard-branch">
+          <div class="orchard-leaf" style="background:#e94560; box-shadow:0 0 10px #e94560;"></div>
+          <div class="orchard-branch-stem" id="stem-fruit" style="height: 100px; background:#e94560;"></div>
+          <div class="db-label">FRUIT</div>
+        </div>
+      </div>
+      <div style="text-align: center; margin-top: 15px; font-size:12px;">
+        Orchard Index: <span id="orchardIndexVal" style="font-weight: 700; color:#00ff88;">0.0</span> | Growth G: <span id="orchardGrowthVal" style="font-weight: 700; color:#ffd700;">0.0</span>
+      </div>
+    </div>
+
+    <!-- Severe Network Fallback Reader -->
+    <div class="apwa-view-overlay apwa-view-reader" style="background:#fff; border: 3px solid #000; box-shadow:none;">
+      <div class="plain-text-reader">
+        <h2>SEVERE NETWORK BRIEFING — OFFLINE ARCHIVE</h2>
+        <p>You are viewing the severe network fallback mode. All assets are loaded locally from the PWA cache. Telemetry is serialized locally in the IndexedDB durable queue.</p>
+        <p><strong>System Status Summary:</strong></p>
+        <ul>
+          <li><strong>Ecosystem Mesh:</strong> Stage 8 Load Shedding Safe Mode Active</li>
+          <li><strong>Cryptographic Local Mesh:</strong> Online, local cryptographic binding active</li>
+          <li><strong>Core Scripture:</strong> "Be still, and know that I am God." — Psalm 46:10</li>
+        </ul>
+        <p>Any offline telemetry packet created during this state will sync automatically once network latency drops below 800ms.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SOVEREIGN CONTROL DASHBOARD -->
+  <section class="dashboard-section" id="governance-dashboard">
+    <div class="section-header" style="margin-bottom: 40px;">
+      <h2 style="color: #fff; text-shadow: 0 0 10px rgba(123,97,255,0.3);">Sovereign Control Dashboard</h2>
+      <p style="color: var(--text-dim);">Live Telemetry Dashboard for the Governance System Main Brain (GSMB)</p>
+    </div>
+
+    <div class="db-grid">
+      <!-- PANEL 1: APWA CONTEXT & MODE -->
+      <div class="db-card">
+        <div class="db-title">🌊 APWA Context & Senser</div>
+        <div class="db-metric" id="apwaModeText">TRIAGE_FEED_UI</div>
+        <div class="db-row">
+          <span class="db-label">Age Cohort:</span>
+          <select id="apwaCohort" onchange="updateAPWA()" style="background:#131326; border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:11px; padding:3px; border-radius:4px;">
+            <option value="19-33" selected>19-33 (Developer/Analyst)</option>
+            <option value="8-13">8-13 (Young Swarm)</option>
+            <option value="41-55">41-55 (Command/Logistics)</option>
+            <option value="56-80">56-80 (Simple/Voice)</option>
+          </select>
+        </div>
+        <div class="db-row">
+          <span class="db-label">Archetype:</span>
+          <select id="apwaArchetype" onchange="updateAPWA()" style="background:#131326; border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:11px; padding:3px; border-radius:4px;">
+            <option value="CONSUMER" selected>Consumer</option>
+            <option value="ANALYST">Analyst</option>
+            <option value="TEXTER">Texter</option>
+          </select>
+        </div>
+        <div class="db-row" style="margin-top: 10px;">
+          <span class="db-label">Data Friction:</span>
+          <span class="db-value" id="frictionVal">20 ms</span>
+        </div>
+        <input type="range" id="apwaFriction" min="0" max="1000" value="20" oninput="updateAPWA()" style="width:100%; margin-top:6px; accent-color:var(--accent);">
+      </div>
+
+      <!-- PANEL 2: CBP DURABLE SYNC (IndexedDB) -->
+      <div class="db-card">
+        <div class="db-title">🩸 CBP Sync & Durable Queue</div>
+        <div class="db-row">
+          <span class="db-label">Queue Length:</span>
+          <span class="db-value" id="dbQueueDepth" style="color:var(--accent2); font-weight:700;">0 events</span>
+        </div>
+        <div class="db-row">
+          <span class="db-label">Sync Success:</span>
+          <span class="db-value" id="dbSyncRate">100%</span>
+        </div>
+        <div class="db-row">
+          <span class="db-label">Avg Sync Latency:</span>
+          <span class="db-value" id="dbAvgLatency">0 ms</span>
+        </div>
+        <div class="db-row">
+          <span class="db-label">Policy Verdict:</span>
+          <span class="db-value" id="dbPolicyPasses" style="color:#00ff88;">0 Passes</span>
+        </div>
+        <button class="db-btn" onclick="triggerCBPSync()">Sync Batch Now</button>
+        <button class="db-btn db-btn-alt" onclick="generateMockTelemetry()">Generate Queue Telemetry</button>
+      </div>
+
+      <!-- PANEL 3: POC HARD GATES -->
+      <div class="db-card">
+        <div class="db-title">⚡ POC Enforcer & Gates</div>
+        <div class="db-metric" id="dbGrowthScore">G = 0.00</div>
+        <div class="db-row">
+          <span class="db-label">Proof Gate:</span>
+          <span class="db-value" id="gateProof"><span class="status-indicator status-ok"></span> ACTIVE</span>
+        </div>
+        <div class="db-row">
+          <span class="db-label">Cadence Gate:</span>
+          <span class="db-value" id="gateCadence"><span class="status-indicator status-ok"></span> ACTIVE</span>
+        </div>
+        <div class="db-row">
+          <span class="db-label">Integrity Gate:</span>
+          <span class="db-value" id="gateIntegrity"><span class="status-indicator status-ok"></span> ENFORCED</span>
+        </div>
+        <div class="db-row">
+          <span class="db-label">Yield Gate:</span>
+          <span class="db-value" id="gateYield"><span class="status-indicator status-ok"></span> HEALTHY</span>
+        </div>
+        <button class="db-btn" onclick="triggerGrowthBurst()">Trigger 10x Growth Burst</button>
+      </div>
+
+      <!-- PANEL 4: SECURE ORCHARD MESH -->
+      <div class="db-card">
+        <div class="db-title">📦 LocalOrchardMesh Telemetry</div>
+        <div class="db-row">
+          <span class="db-label">Geo Location:</span>
+          <input type="text" id="meshGeo" value="-25.747, 28.188" style="background:#131326; border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:11px; padding:3px; border-radius:4px; width:120px;">
+        </div>
+        <div class="db-row" style="margin-top: 6px;">
+          <span class="db-label">Binary Telemetry Input:</span>
+          <input type="checkbox" id="meshBinary" checked style="accent-color:var(--accent2);">
+        </div>
+        <div class="db-row" style="margin-top: 6px;">
+          <span class="db-label">Integrity Signature:</span>
+          <span class="db-value" id="meshSignature" style="font-size:10px; color:var(--accent-light);">None</span>
+        </div>
+        <button class="db-btn" onclick="captureMeshTelemetry()">Capture Secure Telemetry</button>
+      </div>
+    </div>
+
+    <!-- PANEL 5: SWARM LEARNING REAL-TIME LOG -->
+    <div class="db-card" style="max-width: 1200px; margin: 0 auto;">
+      <div class="db-title">📊 Real-time Swarm Learning Corpus & Faith Patterns</div>
+      <div class="db-grid" style="grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 0;">
+        <div>
+          <div style="font-weight: 700; margin-bottom: 8px; font-size:12px; color:#fff;">LATEST DISCOVERED PATTERNS</div>
+          <div id="discoveredPatternsList" style="font-family:var(--mono); font-size:11px; height:120px; overflow-y:auto; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.06); padding:10px; border-radius:4px;">
+            No patterns detected yet. Auto-enforcer scans timing signatures...
+          </div>
+        </div>
+        <div>
+          <div style="font-weight: 700; margin-bottom: 8px; font-size:12px; color:#fff;">SWARM LEARNING CORPUS</div>
+          <div class="db-row">
+            <span class="db-label">Total Learned:</span>
+            <span class="db-value" id="learnCorpusSize">0 records</span>
+          </div>
+          <div class="db-row">
+            <span class="db-label">Total Proven (Taught & Graduated):</span>
+            <span class="db-value" id="learnProvenSize" style="color:var(--gold);">0 records</span>
+          </div>
+          <button class="db-btn db-btn-alt" onclick="exportCorpusReceipts()" style="margin-top: 10px;">📦 Export Swarm Learning Receipts (.jsonl)</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- FOOTER -->
   <footer>
     <p>&copy; 2026 Kopano Labs (Pty) Ltd · <a href="https://kopanolabs.com">kopanolabs.com</a> · <a href="https://krrababalela.com">KRRababalela.com</a></p>
@@ -678,6 +1119,235 @@
         updateTracker();
       });
     }, 2000);
+
+    // ═══ PWA SERVICE WORKER REGISTRATION ═══
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then((reg) => {
+          console.log('[PWA] Service Worker registered scope:', reg.scope);
+        }).catch((err) => {
+          console.error('[PWA] Service Worker registration failed:', err);
+        });
+      });
+    }
+
+    // ═══ APWA WORKER / USER INTERACTION INTERFACE ═══
+    function updateAPWA() {
+      const cohort = document.getElementById('apwaCohort').value;
+      const archetype = document.getElementById('apwaArchetype').value;
+      const friction = parseInt(document.getElementById('apwaFriction').value);
+      
+      document.getElementById('frictionVal').textContent = friction + ' ms';
+      
+      // Update APWA profile in runtime state machine
+      if (typeof APWA_StateMachine !== 'undefined') {
+        APWA_StateMachine.updateUserProfile({ ageCohort: cohort, archetype: archetype }, friction);
+        document.getElementById('apwaModeText').textContent = APWA_StateMachine.activeMode;
+      }
+      
+      updateOrchardVisuals();
+      updateDashboard();
+    }
+
+    function updateOrchardVisuals() {
+      if (typeof OrchardOrchestration === 'undefined') return;
+      const ooi = OrchardOrchestration.computeIndex();
+      const growth = OrchardOrchestration.computeGrowthCoefficient();
+      
+      const idxEl = document.getElementById('orchardIndexVal');
+      const grEl = document.getElementById('orchardGrowthVal');
+      if (idxEl) idxEl.textContent = ooi.orchard_index;
+      if (grEl) grEl.textContent = growth.G;
+
+      // Adjust branch stem heights based on metrics
+      const p = document.getElementById('stem-plant');
+      const w = document.getElementById('stem-water');
+      const pr = document.getElementById('stem-prune');
+      const h = document.getElementById('stem-harvest');
+      const f = document.getElementById('stem-fruit');
+      
+      if (p) p.style.height = Math.min(180, Math.max(30, ooi.orchard_index * 0.1)) + 'px';
+      if (w) w.style.height = Math.min(180, Math.max(30, growth.G * 15)) + 'px';
+      if (pr) pr.style.height = Math.min(180, Math.max(30, ooi.tau_throughput / 15)) + 'px';
+      if (h) h.style.height = Math.min(180, Math.max(30, (KCLedger.getCount() + CasseyGuardian.getCount()) * 2)) + 'px';
+      if (f) f.style.height = Math.min(180, Math.max(30, SwarmLearning.getProvenCount() * 12)) + 'px';
+    }
+
+    // CBP Sync
+    async function triggerCBPSync() {
+      if (typeof ContextBleedProtocol === 'undefined') return;
+      const btn = event.target;
+      btn.textContent = 'Syncing...';
+      btn.disabled = true;
+      try {
+        const res = await ContextBleedProtocol.syncBatch(50);
+        console.log('[GUI] CBP Sync Result:', res);
+      } catch(e) {
+        console.error('[GUI] CBP Sync Error:', e);
+      } finally {
+        btn.textContent = 'Sync Batch Now';
+        btn.disabled = false;
+        updateDashboard();
+      }
+    }
+
+    // Generate Mock Telemetry
+    async function generateMockTelemetry() {
+      if (typeof ContextBleedProtocol === 'undefined') return;
+      await ContextBleedProtocol.logInput(true, 'user_manual_trigger');
+      updateDashboard();
+    }
+
+    // Trigger Growth Burst
+    function triggerGrowthBurst() {
+      if (typeof POCEnforcement === 'undefined') return;
+      POCEnforcement.growthBurst(10);
+      updateDashboard();
+    }
+
+    // Capture Local Orchard Mesh Telemetry
+    async function captureMeshTelemetry() {
+      if (typeof LocalOrchardMesh === 'undefined') return;
+      const geo = document.getElementById('meshGeo').value;
+      const binary = document.getElementById('meshBinary').checked;
+      
+      const cohort = document.getElementById('apwaCohort').value;
+      const packet = await LocalOrchardMesh.capturePavementPayload(binary, cohort, geo);
+      document.getElementById('meshSignature').textContent = packet.signature;
+      updateDashboard();
+    }
+
+    // Export Swarm Learning Receipts
+    function exportCorpusReceipts() {
+      if (typeof SwarmLearning !== 'undefined') {
+        SwarmLearning.exportLearningReceipts();
+      }
+    }
+
+    // Voice UI Interactive simulator
+    const apwaVoiceOrb = document.getElementById('apwaVoiceOrb');
+    if (apwaVoiceOrb) {
+      apwaVoiceOrb.addEventListener('click', () => {
+        const trans = document.getElementById('voiceTranscript');
+        trans.textContent = '"Listening..."';
+        setTimeout(() => {
+          const commands = [
+            '"Eddie reports rock haulage normal in Sector 4"',
+            '"Freddy triggers auto-irrigation in KasiLink Garden Hub"',
+            '"CrisisConnect local mesh nodes status healthy"',
+            '"Altar gate authorized public telemetry ingress"'
+          ];
+          const choice = commands[Math.floor(Math.random() * commands.length)];
+          trans.textContent = 'Transcription: ' + choice;
+          // Dual flow ingestion
+          CommsLogConnector.dualFlow('Voice command: ' + choice, 'voice_assistant');
+          updateTracker();
+        }, 1500);
+      });
+    }
+
+    // HUD Tactical HUD console simulation
+    function hudConsoleAction(action) {
+      const consoleEl = document.getElementById('hudConsole');
+      if (!consoleEl) return;
+      if (action === 'clear') {
+        consoleEl.innerHTML = '';
+      } else if (action === 'ping') {
+        consoleEl.innerHTML += `<br>[${new Date().toISOString().slice(11, 19)}] Ping sent to 300 agents... All responded (100% compliance)`;
+        consoleEl.scrollTop = consoleEl.scrollHeight;
+        // Dual flow
+        CommsLogConnector.dualFlow('Tactical HUD Ping sent', 'command_center');
+        updateTracker();
+      }
+    }
+
+    // Main dashboard update loop
+    async function updateDashboard() {
+      updateTracker();
+      
+      // Update APWA text
+      if (typeof APWA_StateMachine !== 'undefined') {
+        document.getElementById('apwaModeText').textContent = APWA_StateMachine.activeMode;
+      }
+      
+      // CBP metrics
+      if (typeof ContextBleedProtocol !== 'undefined') {
+        const queueSize = await ContextBleedProtocol.getQueueSize();
+        document.getElementById('dbQueueDepth').textContent = queueSize + ' events';
+        
+        const m = ContextBleedProtocol.getMetrics();
+        document.getElementById('dbSyncRate').textContent = m.success_rate;
+        document.getElementById('dbAvgLatency').textContent = m.avg_latency_ms + ' ms';
+        document.getElementById('dbPolicyPasses').textContent = m.policy_passes + ' Passes / ' + m.policy_blocks + ' Blocks';
+      }
+
+      // POC metrics
+      if (typeof computeGrowthScore !== 'undefined') {
+        const gs = computeGrowthScore();
+        document.getElementById('dbGrowthScore').textContent = 'G = ' + gs.growthScore;
+        
+        const updateGateIndicator = (id, check) => {
+          const el = document.getElementById(id);
+          if (el) {
+            if (check) {
+              el.innerHTML = '<span class="status-indicator status-ok"></span> ACTIVE';
+            } else {
+              el.innerHTML = '<span class="status-indicator status-warn"></span> WARNING';
+            }
+          }
+        };
+
+        const progress = KCGraduation.checkProgress();
+        updateGateIndicator('gateProof', progress.validated >= 4);
+        updateGateIndicator('gateCadence', true); // Enforced by timer
+        updateGateIndicator('gateIntegrity', POCEnforcement._integrityViolations === 0);
+        updateGateIndicator('gateYield', gs.yieldMean > 0.6);
+      }
+
+      // Swarm Learning Info
+      if (typeof SwarmLearning !== 'undefined') {
+        const corpus = SwarmLearning.getCorpus();
+        document.getElementById('learnCorpusSize').textContent = corpus.length + ' records';
+        document.getElementById('learnProvenSize').textContent = SwarmLearning.getProvenCount() + ' records';
+
+        // Discovered patterns display
+        const patternsList = document.getElementById('discoveredPatternsList');
+        if (patternsList) {
+          const detections = FaithPatterns.getDetections();
+          if (detections.length > 0) {
+            patternsList.innerHTML = detections.slice(-5).map(d => {
+              return `<div style="margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 4px;">
+                <span style="color:#ffd700;">✝️ ${d.type.toUpperCase()}</span>: ${d.teaching.slice(0, 70)}...
+              </div>`;
+            }).join('');
+          } else {
+            patternsList.innerHTML = 'No patterns detected yet. Auto-enforcer scans timing signatures...';
+          }
+        }
+
+        // Dense data table population
+        const denseTable = document.getElementById('denseDataTable');
+        if (denseTable) {
+          const tbody = denseTable.querySelector('tbody');
+          if (tbody) {
+            tbody.innerHTML = corpus.slice(-6).map(p => {
+              return `<tr>
+                <td>${p.ts.slice(11, 19)}</td>
+                <td>${p.node}</td>
+                <td>${p.swfus_layer}</td>
+                <td><code style="color:var(--accent-light);">${p.receipt_hash}</code></td>
+                <td><span style="color:${p.crud_pass ? '#00ff88' : '#ff3366'}">${p.classification_verdict}</span></td>
+              </tr>`;
+            }).join('');
+          }
+        }
+      }
+    }
+
+    // Boot update loop
+    setInterval(updateDashboard, 3000);
+    setTimeout(updateDashboard, 1000);
+    setTimeout(updateOrchardVisuals, 3500);
   </script>
 </body>
 </html>

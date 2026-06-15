@@ -135,6 +135,24 @@ const CasseyGuardian = {
     scripture: SCRIPTURE.TRAIN,
   },
 
+  assess(data) {
+    const entry = {
+      ts: new Date().toISOString(),
+      renter: data.source || 'poc_enforcement',
+      context: data.payload || 'general',
+      teaching: data.payload || 'Observation recorded by POC enforcement',
+      verdict: 'WATCH',
+      note: 'Assess vector registered.',
+      scripture: SCRIPTURE.FAITH,
+    };
+    this._assessments.push(entry);
+    const stored = JSON.parse(sessionStorage.getItem('cassey_hustle') || '[]');
+    stored.push(entry);
+    sessionStorage.setItem('cassey_hustle', JSON.stringify(stored));
+    console.log(`[CASSEY_GUARDIAN] Assess: ${entry.teaching} from ${entry.renter}`);
+    return entry;
+  },
+
   teachApprentice(renter, context) {
     const assessment = {
       ts: new Date().toISOString(),
@@ -377,6 +395,16 @@ const KPGSRuntime = {
 // "For the gate is narrow and the way is hard." — Matthew 7:14
 // ═══════════════════════════════════════════════════════════════
 const AltarGate = {
+  verify(payload, policyRef) {
+    const text = typeof payload === 'string' ? payload : JSON.stringify(payload);
+    const wwjd = KPGSRuntime.wwjdFirewall(text);
+    return {
+      verdict: wwjd.pass ? 'PROCEED' : 'SEVER',
+      reason: wwjd.reason,
+      policy: policyRef || 'default'
+    };
+  },
+
   async processCall(method, path, payload) {
     const results = { layers: [], verdict: 'HOLD', scripture: '' };
     const start = Date.now();
@@ -536,13 +564,20 @@ const SeedProtocol = {
   _seeds: [],
   _SWFUS_LAYERS: ['Soil', 'Water', 'Fire', 'Underground', 'Sky'],
 
+  seed(source, nodeId, data) {
+    console.log(`[SEED_PROTOCOL] Seed triggered from ${source} for node ${nodeId}`);
+    // Safe fallback: map arbitrary nodeId to known nodes if not matched
+    const finalNodeId = this.NODES[nodeId] ? nodeId : 'kopanocontext';
+    return this.cycle(finalNodeId, data ? data.action : 'reseed');
+  },
+
   // ECOSYSTEM NODES — every HTTPS in the governance mesh
   NODES: {
     kopanolabs:     { url: 'https://kopanolabs.com',                   landlord: 'Operational General', swfus: 'Soil',        plot: 'Enterprise Hub' },
     krrababalela:   { url: 'https://krrababalela.com',                 landlord: 'Kholofelo Robyn Rababalela', swfus: 'Sky',  plot: 'Architect Portal' },
     kasilink:       { url: 'https://kasilink.com',                     landlord: 'KC + Cassey',         swfus: 'Water',       plot: 'Township Gigs' },
     crisisconnect:  { url: 'https://crisisconnect.kopanolabs.com',     landlord: 'CrisisConnect Agent', swfus: 'Fire',        plot: 'Crisis PWA' },
-    fivesarena:     { url: 'https://blog.fivesarena.com',              landlord: 'Ama-Phu Entertainment', swfus: 'Underground', plot: 'Football Culture' },
+    fivesarena:     { url: 'https://fivesarena.com',              landlord: 'Ama-Phu Entertainment', swfus: 'Underground', plot: 'Football Culture' },
     kopanocontext:  { url: 'https://kopanocontext.kopanolabs.com',     landlord: 'Kopano Context',      swfus: 'Sky',         plot: 'Governance Core' },
   },
 
@@ -888,13 +923,24 @@ const KCGraduation = {
     PROOF_04: { name: 'Graduate',  required: 1000, type: 'cassey_approved',    scripture: '"Well done, good and faithful servant." — Matthew 25:21' },
   },
 
+  registerProof(proofId, band) {
+    const stored = JSON.parse(sessionStorage.getItem('kpgs_kc_proofs') || '[]');
+    if (!stored.some(p => p.id === proofId)) {
+      stored.push({ id: proofId, band, ts: new Date().toISOString() });
+      sessionStorage.setItem('kpgs_kc_proofs', JSON.stringify(stored));
+      console.log(`[KC_GRADUATION] 🎓 Registered proof ${proofId} for band ${band}`);
+    }
+    this.checkProgress();
+  },
+
   // Check KC's current progress
   checkProgress() {
     const observations = KCLedger.getCount();
     const seeds = SeedProtocol.getSeedCount();
     const learningCorpus = SwarmLearning.getCorpus();
     const validated = learningCorpus.filter(p => p.graduation_level !== 'observed').length;
-    const proven = learningCorpus.filter(p => p.graduation_level === 'proven').length;
+    const registeredProofs = JSON.parse(sessionStorage.getItem('kpgs_kc_proofs') || '[]');
+    const proven = learningCorpus.filter(p => p.graduation_level === 'proven').length + registeredProofs.length;
 
     const progress = {
       PROOF_01: { current: observations, required: 50,   pass: observations >= 50,  name: 'Catalog' },
@@ -1106,6 +1152,7 @@ const CasseyCurriculum = {
 const FaithPatterns = {
   _detections: [],
   _STORAGE_KEY: 'kpgs_faith_patterns',
+  get _detectedCount() { return this._detections.length; },
 
   // Detect fibonacci-like growth in a series
   detectFibonacci(series) {
@@ -1798,10 +1845,9 @@ const OrchardOrchestration = {
     return r;
   },
 
-  // Gap #10: Executable growth coefficient
   computeGrowthCoefficient() {
-    const proofs = [KCGraduation._proofBands?.['PROOF-01'] || 0, KCGraduation._proofBands?.['PROOF-02'] || 0, KCGraduation._proofBands?.['PROOF-03'] || 0, KCGraduation._proofBands?.['PROOF-04'] || 0];
-    const sumP = proofs.reduce((a, b) => a + b, 0);
+    const progress = KCGraduation.checkProgress();
+    const sumP = progress.observations + progress.seeds + progress.validated + progress.proven;
     const deltaT = 5;
     const omegaFaith = Math.max(1, FaithPatterns._detectedCount || 0);
     const G = (sumP / deltaT) * omegaFaith;
@@ -1837,13 +1883,8 @@ if (typeof window !== 'undefined') {
 
 // --- Growth Score (Forge-specified composite metric) ---
 function computeGrowthScore() {
-  const proofs = [
-    KCGraduation._proofBands?.['PROOF-01'] || 0,
-    KCGraduation._proofBands?.['PROOF-02'] || 0,
-    KCGraduation._proofBands?.['PROOF-03'] || 0,
-    KCGraduation._proofBands?.['PROOF-04'] || 0,
-  ];
-  const sumP = proofs.reduce((a, b) => a + b, 0);
+  const progress = KCGraduation.checkProgress();
+  const sumP = progress.observations + progress.seeds + progress.validated + progress.proven;
   const windowSize = Math.max(POCEnforcement._cycleCount, 1);
   const proofRate = sumP / windowSize;
 
@@ -1901,13 +1942,8 @@ const POCEnforcement = {
 
     // === FORGE GATE 1: PROOF GATE ===
     // No state promotion without verifiable artifact
-    const proofs = [
-      KCGraduation._proofBands?.['PROOF-01'] || 0,
-      KCGraduation._proofBands?.['PROOF-02'] || 0,
-      KCGraduation._proofBands?.['PROOF-03'] || 0,
-      KCGraduation._proofBands?.['PROOF-04'] || 0,
-    ];
-    const recentProofs = proofs.reduce((a, b) => a + b, 0);
+    let progress = KCGraduation.checkProgress();
+    const recentProofs = progress.observations + progress.seeds + progress.validated + progress.proven;
     if (recentProofs < this.minProofsPerWindow) {
       CasseyGuardian.assess({ payload: 'LOW_PROOF_DENSITY', source: 'poc_proof_gate' });
       // Lock curriculum progression until proof density increases
@@ -2016,7 +2052,7 @@ const POCEnforcement = {
     }
 
     // KC proof bands
-    const progress = KCGraduation.checkProgress();
+    progress = KCGraduation.checkProgress();
     if (progress.level !== this._lastLevel) {
       console.log(`══════════════════════════════════════════`);
       console.log(`[POC] 🎓 KC GRADUATED: ${this._lastLevel} → ${progress.level}`);

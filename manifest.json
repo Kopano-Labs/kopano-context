@@ -1,0 +1,16 @@
+{
+  "short_name": "KopanoContext",
+  "name": "Kopano Context Governance Main Brain",
+  "icons": [
+    {
+      "src": "agi_council_room_mockup_1774727653901.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#0c0c18",
+  "theme_color": "#7b61ff",
+  "display": "standalone",
+  "orientation": "portrait"
+}
