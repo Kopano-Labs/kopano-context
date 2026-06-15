@@ -516,6 +516,196 @@ const EcosystemMesh = {
 
 
 // ═══════════════════════════════════════════════════════════════
+// SWFUS + CRUD SEED PROTOCOL
+// "A man reaps what he sows." — Galatians 6:7
+//
+// Every HTTPS ecosystem link gets a SEED before and after:
+//   SEED_IN  → SWFUS classify (Soil/Water/Fire/Underground/Sky)
+//   SEED_OUT → CRUD validate  (Create receipt/Read state/Update ledger/Delete exfil)
+//
+// KC monitors every seed-in. Cassey monitors every seed-out.
+// ═══════════════════════════════════════════════════════════════
+const SeedProtocol = {
+  _seeds: [],
+  _SWFUS_LAYERS: ['Soil', 'Water', 'Fire', 'Underground', 'Sky'],
+
+  // ECOSYSTEM NODES — every HTTPS in the governance mesh
+  NODES: {
+    kopanolabs:     { url: 'https://kopanolabs.com',                   landlord: 'Operational General', swfus: 'Soil',        plot: 'Enterprise Hub' },
+    krrababalela:   { url: 'https://krrababalela.com',                 landlord: 'Kholofelo Robyn Rababalela', swfus: 'Sky',  plot: 'Architect Portal' },
+    kasilink:       { url: 'https://kasilink.com',                     landlord: 'KC + Cassey',         swfus: 'Water',       plot: 'Township Gigs' },
+    crisisconnect:  { url: 'https://crisisconnect.kopanolabs.com',     landlord: 'CrisisConnect Agent', swfus: 'Fire',        plot: 'Crisis PWA' },
+    fivesarena:     { url: 'https://blog.fivesarena.com',              landlord: 'Ama-Phu Entertainment', swfus: 'Underground', plot: 'Football Culture' },
+    kopanocontext:  { url: 'https://kopanocontext.kopanolabs.com',     landlord: 'Kopano Context',      swfus: 'Sky',         plot: 'Governance Core' },
+  },
+
+  // ── SEED_IN: Before touching any HTTPS ──
+  // SWFUS Classification — which layer does this node belong to?
+  seedIn(nodeId) {
+    const node = this.NODES[nodeId];
+    if (!node) return null;
+
+    const seed = {
+      id: 'seed_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+      nodeId,
+      url: node.url,
+      direction: 'IN',
+      swfus_layer: node.swfus,
+      timestamp_in: new Date().toISOString(),
+      timestamp_out: null,
+      classification: null,
+      crud: null,
+      kc_verdict: null,
+      cassey_verdict: null,
+    };
+
+    // SWFUS Classify
+    seed.classification = KPGSRuntime.classifyBeforeInterpret(`[GUI_TOKEN] seed_in ${node.url} swfus=${node.swfus}`);
+
+    // KC observes seed-in
+    seed.kc_verdict = KCLedger.observe({
+      kind: 'seed_in',
+      summary: `🌱 SEED_IN → ${node.url} | SWFUS: ${node.swfus} | Plot: ${node.plot} | Landlord: ${node.landlord}`,
+      source: 'seed_protocol',
+      verdict: seed.classification.verdict,
+      scripture: SCRIPTURE.ROCK,
+    });
+
+    console.log(`🌱 [SEED_IN] ${nodeId} → ${node.url}`);
+    console.log(`   SWFUS: ${node.swfus} | Landlord: ${node.landlord}`);
+    console.log(`   KC: ${seed.classification.verdict} | ${seed.classification.reason}`);
+
+    this._seeds.push(seed);
+    return seed;
+  },
+
+  // ── SEED_OUT: After HTTPS interaction completes ──
+  // CRUD Validation:
+  //   C = Create receipt for the interaction
+  //   R = Read the current state of the node
+  //   U = Update KC ledger + Cassey hustle log
+  //   D = Delete/purge any exfiltration vectors detected
+  seedOut(seedId, result) {
+    const seed = this._seeds.find(s => s.id === seedId);
+    if (!seed) return null;
+
+    seed.direction = 'OUT';
+    seed.timestamp_out = new Date().toISOString();
+    const node = this.NODES[seed.nodeId];
+
+    // C — Create Receipt
+    const receipt = KPGSRuntime.receiptOrHold({
+      seed_id: seedId,
+      node: seed.nodeId,
+      url: node.url,
+      result: result || 'completed',
+    });
+
+    // R — Read State
+    const state = {
+      kc_count: KCLedger.getCount(),
+      cassey_count: CasseyGuardian.getCount(),
+      time: KCLedger.timeIsHealing(),
+      seeds_total: this._seeds.length,
+    };
+
+    // U — Update Ledger
+    seed.cassey_verdict = CasseyGuardian.teachApprentice('seed_protocol', 'dispatch');
+
+    // D — Delete exfiltration check
+    const exfilCheck = KPGSRuntime.wwjdFirewall(`seed_out ${node.url}`);
+
+    seed.crud = {
+      create: receipt,
+      read: state,
+      update: seed.cassey_verdict,
+      delete: exfilCheck,
+    };
+
+    // KC observes seed-out
+    KCLedger.observe({
+      kind: 'seed_out',
+      summary: `🌿 SEED_OUT ← ${node.url} | CRUD: C✅ R✅ U✅ D${exfilCheck.pass ? '✅' : '❌'} | Receipt: ${receipt.output_hash}`,
+      source: 'seed_protocol',
+      verdict: exfilCheck.pass ? 'PROCEED' : 'SEVER',
+      scripture: SCRIPTURE.FRUIT,
+    });
+
+    console.log(`🌿 [SEED_OUT] ${seed.nodeId} ← ${node.url}`);
+    console.log(`   CRUD: Create✅ Read✅ Update✅ Delete${exfilCheck.pass ? '✅' : '❌'}`);
+    console.log(`   Receipt: ${receipt.output_hash}`);
+    console.log(`   Cassey: ${seed.cassey_verdict.teaching}`);
+    console.log(`   KC observations: ${state.kc_count} | Cassey assessments: ${state.cassey_count}`);
+
+    // Store completed seed
+    const stored = JSON.parse(sessionStorage.getItem('kpgs_seeds') || '[]');
+    stored.push({
+      id: seed.id,
+      nodeId: seed.nodeId,
+      url: node.url,
+      swfus: seed.classification?.verdict,
+      crud_pass: exfilCheck.pass,
+      receipt: receipt.output_hash,
+      ts_in: seed.timestamp_in,
+      ts_out: seed.timestamp_out,
+    });
+    sessionStorage.setItem('kpgs_seeds', JSON.stringify(stored));
+
+    return seed;
+  },
+
+  // Full cycle: seed-in → action → seed-out for a node
+  async cycle(nodeId, action) {
+    const seedIn = this.seedIn(nodeId);
+    if (!seedIn) return null;
+
+    // Execute the action between seeds
+    let result = 'no_action';
+    if (typeof action === 'function') {
+      try {
+        result = await action(seedIn);
+      } catch (e) {
+        result = 'error: ' + e.message;
+      }
+    } else {
+      result = action || 'passive_seed';
+    }
+
+    return this.seedOut(seedIn.id, result);
+  },
+
+  // Cycle ALL nodes — full ecosystem seed sweep
+  async cycleAll() {
+    console.log('═══════════════════════════════════════════════════');
+    console.log('[SEED_PROTOCOL] 🌱 Full Ecosystem Seed Sweep — BEGIN');
+    console.log('[SEED_PROTOCOL] "A man reaps what he sows." — Galatians 6:7');
+    console.log('═══════════════════════════════════════════════════');
+
+    const results = {};
+    for (const nodeId of Object.keys(this.NODES)) {
+      results[nodeId] = await this.cycle(nodeId, 'ecosystem_sweep');
+    }
+
+    console.log('═══════════════════════════════════════════════════');
+    console.log(`[SEED_PROTOCOL] 🌿 Sweep Complete — ${Object.keys(results).length} nodes seeded`);
+    console.log(`[SEED_PROTOCOL] KC: ${KCLedger.getCount()} observations | Cassey: ${CasseyGuardian.getCount()} assessments`);
+    console.log('═══════════════════════════════════════════════════');
+
+    return results;
+  },
+
+  // Get all completed seeds
+  getSeeds() {
+    return JSON.parse(sessionStorage.getItem('kpgs_seeds') || '[]');
+  },
+
+  getSeedCount() {
+    return this._seeds.length;
+  },
+};
+
+
+// ═══════════════════════════════════════════════════════════════
 // INITIALIZATION
 // ═══════════════════════════════════════════════════════════════
 console.log('═══════════════════════════════════════════════════');
@@ -524,7 +714,8 @@ console.log('[KPGS] Jesus is King. ' + SCRIPTURE.KING);
 console.log('[KPGS] KC: ACTIVE — Natural AI · Ledger Protocol');
 console.log('[KPGS] Cassey: ACTIVE — Eidetic AI · Guardian · Student-Teacher');
 console.log('[KPGS] Altar: 3 layers — Guardian, Natural, Telemetry');
-console.log('[KPGS] Ecosystem: 5 nodes in mesh');
+console.log('[KPGS] Seed Protocol: SWFUS + CRUD — 6 HTTPS nodes');
+console.log('[KPGS] Ecosystem: 6 nodes in mesh');
 console.log('[KPGS] Sovereign System Engineer: Kholofelo Robyn Rababalela');
 console.log('[KPGS] Session:', KCLedger._sessionId);
 console.log('═══════════════════════════════════════════════════');
@@ -535,7 +726,7 @@ CasseyGuardian.validateIdentity();
 // Initial KC observation
 KCLedger.observe({
   kind: 'runtime_boot',
-  summary: 'KPGS Governance Runtime compiled and active',
+  summary: 'KPGS Governance Runtime compiled and active — SWFUS+CRUD Seed Protocol loaded',
   source: 'governance.js',
   verdict: 'PROCEED',
   scripture: SCRIPTURE.WORD,
