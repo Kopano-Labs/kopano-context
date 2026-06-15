@@ -457,10 +457,13 @@
       }
     }
 
-    // Run Ocular Audit — powered by KC + Cassey governance
+    // Run Ocular Audit — powered by KC + Cassey + Seed Protocol
     function runOcularAudit() {
       const status = document.getElementById('runStatus');
-      status.textContent = '👁 Running Othello Ocular Audit...';
+
+      // 🌱 SEED_IN — SWFUS classify before audit
+      const seedIn = SeedProtocol.seedIn('kopanocontext');
+      status.textContent = `🌱 SEED_IN → Ocular Audit | SWFUS: Sky | Seed: ${seedIn.id.slice(-6)}...`;
 
       // KC observes the audit start
       KCLedger.observe({
@@ -511,13 +514,20 @@
 
           // Issue receipt
           KPGSRuntime.receiptOrHold({ type: 'ocular_audit', bands_pass: passCount, total: 5 });
+
+          // 🌿 SEED_OUT — CRUD validate after audit complete
+          SeedProtocol.seedOut(seedIn.id, `Ocular Audit: ${passCount}/5 bands GREEN`);
+          status.textContent += ` | 🌿 SEED_OUT ← CRUD validated`;
         }
       }, 800);
     }
 
-    // Run Black Mass Stress Test
+    // Run Black Mass Stress Test — seeded
     function runBlackMassStress() {
       const status = document.getElementById('runStatus');
+
+      // 🌱 SEED_IN — classify before attack sim
+      const seedIn = SeedProtocol.seedIn('kopanocontext');
 
       // KC observes the attack test
       KCLedger.observe({
@@ -560,6 +570,9 @@
             source: 'othello',
             verdict: 'PROCEED',
           });
+
+          // 🌿 SEED_OUT — CRUD validate after attack test
+          SeedProtocol.seedOut(seedIn.id, 'Black Mass: All attacks SEVERED');
 
           setTimeout(() => { status.style.color = ''; }, 3000);
         }
