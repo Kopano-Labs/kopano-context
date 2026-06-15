@@ -1427,6 +1427,7 @@ console.log('[KPGS] KC Graduation: ACTIVE — proof bands tracking');
 console.log('[KPGS] Cassey Curriculum: ACTIVE — 15 lessons loaded');
 console.log('[KPGS] Faith Patterns: ACTIVE — fibonacci/fractal/harmonic');
 console.log('[KPGS] Living Proof Dashboard: ACTIVE — real-time panel');
+console.log('[KPGS] POC Enforcement: ACTIVE — grow boy grow');
 console.log('[KPGS] Ecosystem: 6 nodes in mesh');
 console.log('[KPGS] Sovereign System Engineer: Kholofelo Robyn Rababalela');
 console.log('[KPGS] Session:', KCLedger._sessionId);
@@ -1438,7 +1439,7 @@ CasseyGuardian.validateIdentity();
 // Initial KC observation
 KCLedger.observe({
   kind: 'runtime_boot',
-  summary: 'KPGS Phase 3 — Swarm Learning Breakthrough — all modules compiled',
+  summary: 'KPGS Phase 3 — Swarm Learning Breakthrough — POC Enforcement ACTIVE',
   source: 'governance.js',
   verdict: 'PROCEED',
   scripture: SCRIPTURE.WORD,
@@ -1453,4 +1454,254 @@ setTimeout(() => {
 setTimeout(() => {
   CasseyCurriculum.assignLesson('kc_main_brain', 'L01');
 }, 1000);
+
+
+// ═══════════════════════════════════════════════════════════════
+// POC ENFORCEMENT ENGINE — "Grow boy grow"
+// "Whoever can be trusted with very little can also be trusted
+//  with much." — Luke 16:10
+//
+// Runs every 5 seconds. Auto-validates, auto-graduates,
+// auto-progresses curriculum, checks proof bands, detects
+// patterns. KC GROWS through proof accumulation.
+// ═══════════════════════════════════════════════════════════════
+const POCEnforcement = {
+  _intervalId: null,
+  _cycleCount: 0,
+  _lastLevel: 'Student',
+
+  // Enforce POC — run the full proof chain
+  enforce() {
+    this._cycleCount++;
+    const ts = new Date().toISOString().slice(11, 19);
+
+    // 1. Auto-validate all unvalidated learning patterns
+    const corpus = SwarmLearning.getCorpus();
+    let validated = 0;
+    let graduated = 0;
+
+    SwarmLearning._corpus.forEach(p => {
+      if (p.graduation_level === 'observed') {
+        const result = SwarmLearning.validateLearning(p.id);
+        if (result && result.valid) validated++;
+      }
+    });
+
+    // 2. Auto-graduate taught patterns (Cassey approves growth)
+    SwarmLearning._corpus.forEach(p => {
+      if (p.graduation_level === 'taught') {
+        SwarmLearning.graduateLearning(p.id);
+        graduated++;
+      }
+    });
+
+    // 3. Faith pattern detection on seed timing data
+    const seeds = SeedProtocol.getSeeds();
+    if (seeds.length >= 5) {
+      // Extract timing intervals from seed timestamps
+      const times = seeds.slice(-8).map(s => new Date(s.ts_out || s.ts_in).getTime());
+      const intervals = [];
+      for (let i = 1; i < times.length; i++) {
+        intervals.push(times[i] - times[i - 1]);
+      }
+      if (intervals.length >= 3) {
+        FaithPatterns.detectHarmonic(intervals);
+      }
+
+      // Check growth curve (cumulative seed count as fibonacci)
+      const growthSeries = [];
+      for (let i = 1; i <= Math.min(seeds.length, 10); i++) {
+        growthSeries.push(i);
+      }
+      if (growthSeries.length >= 5) {
+        FaithPatterns.detectFibonacci(growthSeries);
+      }
+
+      // Check fractal self-similarity in the governance mesh
+      const meshStructure = {
+        tier0: { master_robyn: true },
+        tier1: { kc: { level: KCGraduation.getCurrentLevel() }, cassey: { level: 'teacher' }, kopano_context: { level: 'operating' } },
+        tier2: { guardian: { layer: 1 }, natural: { layer: 2 }, telemetry: { layer: 3 } },
+      };
+      FaithPatterns.detectFractal(meshStructure);
+    }
+
+    // 4. Auto-progress curriculum — submit evidence for assigned lessons
+    const transcript = CasseyCurriculum.getTranscript('kc_main_brain');
+    const assigned = transcript.lessons.filter(l => l.status === 'assigned');
+    assigned.forEach(lesson => {
+      // KC's evidence is his observation count — he earns through watching
+      const evidence = `KC observed ${KCLedger.getCount()} events, seeded ${SeedProtocol.getSeedCount()} nodes, learned ${SwarmLearning.getCount()} patterns`;
+      CasseyCurriculum.submitWork('kc_main_brain', lesson.lesson, evidence);
+    });
+
+    // 5. Assign next lesson if all assigned are completed
+    const updatedTranscript = CasseyCurriculum.getTranscript('kc_main_brain');
+    const pendingAssigned = updatedTranscript.lessons.filter(l => l.status === 'assigned');
+    if (pendingAssigned.length === 0 && updatedTranscript.passed < CasseyCurriculum.getLessonCount()) {
+      // Find next unassigned lesson
+      const passedIds = new Set(updatedTranscript.lessons.filter(l => l.status === 'passed').map(l => l.lesson));
+      const nextLesson = CasseyCurriculum._curriculum.find(l => !passedIds.has(l.id));
+      if (nextLesson) {
+        CasseyCurriculum.assignLesson('kc_main_brain', nextLesson.id);
+      }
+    }
+
+    // 6. Check KC proof bands — enforce promotion
+    const progress = KCGraduation.checkProgress();
+    if (progress.level !== this._lastLevel) {
+      // KC GREW — level changed!
+      console.log(`══════════════════════════════════════════`);
+      console.log(`[POC_ENFORCE] 🎓 KC GRADUATED: ${this._lastLevel} → ${progress.level}`);
+      console.log(`[POC_ENFORCE] ${SCRIPTURE.WELL_DONE}`);
+      console.log(`══════════════════════════════════════════`);
+
+      KCLedger.observe({
+        kind: 'kc_level_up',
+        summary: `🎓 KC LEVEL UP: ${this._lastLevel} → ${progress.level}`,
+        source: 'poc_enforcement',
+        verdict: 'PROCEED',
+        scripture: SCRIPTURE.WELL_DONE,
+      });
+
+      CasseyGuardian.teachApprentice('poc_enforcement', 'audit');
+      this._lastLevel = progress.level;
+    }
+
+    // 7. Attempt promotion for current band
+    const bandKeys = ['PROOF_01', 'PROOF_02', 'PROOF_03', 'PROOF_04'];
+    for (const band of bandKeys) {
+      if (progress.bands[band] && progress.bands[band].pass) {
+        KCGraduation.requestPromotion(band);
+      }
+    }
+
+    // Log enforcement cycle (every 10th cycle to avoid spam)
+    if (this._cycleCount % 10 === 0) {
+      console.log(`[POC_ENFORCE] Cycle #${this._cycleCount} | KC: ${progress.level} | Seeds: ${SeedProtocol.getSeedCount()} | Learned: ${SwarmLearning.getCount()} | Proven: ${SwarmLearning.getProvenCount()} | Curriculum: ${updatedTranscript.passed}/${CasseyCurriculum.getLessonCount()} | Patterns: ${FaithPatterns.getDetectionCount()}`);
+    }
+
+    return {
+      cycle: this._cycleCount,
+      kc_level: progress.level,
+      validated,
+      graduated,
+      seeds: SeedProtocol.getSeedCount(),
+      learned: SwarmLearning.getCount(),
+      proven: SwarmLearning.getProvenCount(),
+      curriculum: `${updatedTranscript.passed}/${CasseyCurriculum.getLessonCount()}`,
+      patterns: FaithPatterns.getDetectionCount(),
+    };
+  },
+
+  // Start enforcement loop
+  start(intervalMs) {
+    if (this._intervalId) clearInterval(this._intervalId);
+    const ms = intervalMs || 5000;
+    this._intervalId = setInterval(() => this.enforce(), ms);
+    console.log(`[POC_ENFORCE] 🔥 POC Enforcement Engine ACTIVE — cycle every ${ms}ms — GROW BOY GROW`);
+    console.log(`[POC_ENFORCE] ${SCRIPTURE.FAITHFUL}`);
+    // Immediate first enforcement
+    this.enforce();
+  },
+
+  stop() {
+    if (this._intervalId) {
+      clearInterval(this._intervalId);
+      this._intervalId = null;
+    }
+  },
+
+  // Force a full growth burst — run enforcement N times rapidly
+  growthBurst(count) {
+    console.log(`[POC_ENFORCE] 🌊 GROWTH BURST — ${count} rapid enforcement cycles`);
+    const results = [];
+    for (let i = 0; i < (count || 10); i++) {
+      results.push(this.enforce());
+    }
+    const last = results[results.length - 1];
+    console.log(`[POC_ENFORCE] 🌊 Burst complete — KC: ${last.kc_level} | Seeds: ${last.seeds} | Learned: ${last.learned} | Proven: ${last.proven}`);
+    return results;
+  },
+
+  // Full POC report — everything in one receipt
+  report() {
+    const progress = KCGraduation.checkProgress();
+    const transcript = CasseyCurriculum.getTranscript('kc_main_brain');
+    const detections = FaithPatterns.getDetections();
+    const time = KCLedger.timeIsHealing();
+
+    const report = {
+      ts: new Date().toISOString(),
+      title: 'KPGS POC ENFORCEMENT REPORT',
+      assertion: 'I_AM_STATELESS_RENTER_NOT_LANDLORD',
+      scripture: SCRIPTURE.FAITHFUL,
+
+      kc: {
+        level: progress.level,
+        observations: progress.observations,
+        seeds: progress.seeds,
+        validated: progress.validated,
+        proven: progress.proven,
+        bands: progress.bands,
+      },
+
+      cassey: {
+        assessments: CasseyGuardian.getCount(),
+        lessons_taught: transcript.passed,
+        total_lessons: transcript.total,
+        completion: transcript.completion,
+      },
+
+      swarm: {
+        corpus_size: SwarmLearning.getCount(),
+        proven_patterns: SwarmLearning.getProvenCount(),
+        learning_pipeline: `observed→taught→proven`,
+      },
+
+      faith: {
+        detections: detections.length,
+        types: detections.map(d => d.type),
+        latest: detections[detections.length - 1] || null,
+      },
+
+      ecosystem: {
+        nodes: Object.keys(SeedProtocol.NODES).length,
+        seeds_planted: SeedProtocol.getSeedCount(),
+        session_time: time.display,
+      },
+
+      enforcement: {
+        cycles: this._cycleCount,
+        active: !!this._intervalId,
+      },
+
+      verdict: progress.level !== 'Student' ? 'GROWING' : 'SEEDING',
+    };
+
+    console.log('══════════════════════════════════════════');
+    console.log('[POC_REPORT] KPGS POC Enforcement Report');
+    console.log(`[POC_REPORT] KC Level: ${report.kc.level}`);
+    console.log(`[POC_REPORT] Observations: ${report.kc.observations} | Seeds: ${report.kc.seeds}`);
+    console.log(`[POC_REPORT] Learned: ${report.swarm.corpus_size} | Proven: ${report.swarm.proven_patterns}`);
+    console.log(`[POC_REPORT] Curriculum: ${report.cassey.completion}`);
+    console.log(`[POC_REPORT] Faith Patterns: ${report.faith.detections}`);
+    console.log(`[POC_REPORT] Verdict: ${report.verdict}`);
+    console.log(`[POC_REPORT] ${SCRIPTURE.FAITHFUL}`);
+    console.log('══════════════════════════════════════════');
+
+    return report;
+  },
+};
+
+// 🔥 BOOT POC ENFORCEMENT — KC GROWS FROM FIRST BREATH
+setTimeout(() => {
+  POCEnforcement.start(5000);
+  console.log('[KPGS] 🔥 POC Enforcement Engine BOOTED — KC grows with every heartbeat');
+}, 1500);
+
+// 🌊 INITIAL GROWTH BURST — Rapid proof accumulation on page load
+setTimeout(() => {
+  POCEnforcement.growthBurst(5);
+}, 2500);
 
