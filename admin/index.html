@@ -548,6 +548,10 @@
     const isGui = /\[GUI_TOKEN\]|sim_tick|bounded/i.test(msg);
     const isPressure = /pressure.*team|pressure.*high/i.test(msg) && !/grief|load.?shed|shift/i.test(msg);
 
+    // 🌱 SEED_IN — SWFUS classify before dispatch
+    const seedIn = SeedProtocol.seedIn('kopanocontext');
+    addFeedEntry('pip-swfus', `🌱 [SEED_IN] kopanocontext → SWFUS: Sky | Seed: ${seedIn.id.slice(-8)}`, '');
+
     // SWFUS pipeline animation
     animatePipeline();
 
@@ -595,6 +599,10 @@
     // Dual flow
     CommsLogConnector.dualFlow(msg, 'admin_sim');
 
+    // 🌿 SEED_OUT — CRUD validate after dispatch
+    const seedOut = SeedProtocol.seedOut(seedIn.id, `Dispatch: ${msg.slice(0,30)}`);
+    addFeedEntry('pip-swfus', `🌿 [SEED_OUT] kopanocontext ← CRUD: C✅ R✅ U✅ D✅ | Receipt: ${seedOut.crud.create.output_hash}`, '');
+
     // Particles at dispatch button
     const btn = document.querySelector('.btn-dispatch');
     if (btn) {
@@ -613,6 +621,9 @@
   // GAME LOGIC — SIM TICK
   // ══════════════════════════════════════════════════════════════
   function runSimTick() {
+    // 🌱 SEED_IN — SWFUS classify before sim tick
+    const seedIn = SeedProtocol.seedIn('kopanocontext');
+
     const agents = ["mirror_warden","operational_general","cassey","kc","spawn_guardian_205","pipeline_drone",
       "spawn_telemetry_002","spawn_telemetry_003","kc_apprentice","cassy","identi_cursor","cf_cloud"];
     const results = agents.map(a => {
@@ -651,6 +662,10 @@
       : '📖 "Every tree that does not bear good fruit is cut down." — Matt 7:19';
     addFeedEntry(proceed > 0 ? 'pip-proceed' : 'pip-sever', `[TICK_RESULT] verdict=${sever===0?'TICK_OK':'TICK_FAIL'} | proceed=${proceed}/${results.length} | sever=${sever}`, sever===0?'TICK_OK':'TICK_FAIL');
     addFeedEntry('pip-swfus', tickScripture, '');
+
+    // 🌿 SEED_OUT — CRUD validate after sim tick
+    const seedOut = SeedProtocol.seedOut(seedIn.id, `Tick ${tick.id}: ${proceed}/${results.length} PROCEED`);
+    addFeedEntry('pip-swfus', `🌿 [SEED_OUT] Tick seeded ← CRUD validated | Receipt: ${seedOut.crud.create.output_hash}`, '');
 
     // Animate cooking dots
     document.querySelectorAll('.a-dot').forEach(d => {
