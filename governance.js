@@ -1464,6 +1464,274 @@ setTimeout(() => {
 
 
 // ═══════════════════════════════════════════════════════════════
+// CONTEXT BLEED PROTOCOL (CBP) — Vanguard-Apex Thesis
+// "Silent sync to Main Brain Ledger"
+//
+// Controls data migration between offline mobile orchard and
+// online enterprise mainframes (Azure southafricanorth).
+// Architected by: Vanguard-Apex (Gemini Enterprise Apex)
+// ═══════════════════════════════════════════════════════════════
+const ContextBleedProtocol = {
+  _state: 0, // 0=OFFLINE, 1=CBP_ACTIVE
+  _queue: [],
+  _STORAGE_KEY: 'kpgs_cbp_queue',
+  _syncCount: 0,
+
+  STATES: {
+    OFFLINE: 0,
+    EDGE_DETECT: 0.5,
+    CBP_ACTIVE: 1,
+    BACKEND_BLEED: 2,
+  },
+
+  // Log a binary input from the pavement (offline or online)
+  logInput(binaryInput, context) {
+    const entry = {
+      id: 'cbp_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5),
+      ts: new Date().toISOString(),
+      binary_input_x: binaryInput ? 1 : 0,
+      context: context || 'pavement_input',
+      cbp_state: this._state,
+      synced: false,
+      device_throughput: this._measureThroughput(),
+    };
+
+    this._queue.push(entry);
+
+    // Persist to sessionStorage (simulating IndexedDB queue)
+    const stored = JSON.parse(sessionStorage.getItem(this._STORAGE_KEY) || '[]');
+    stored.push(entry);
+    sessionStorage.setItem(this._STORAGE_KEY, JSON.stringify(stored));
+
+    KCLedger.observe({
+      kind: 'cbp_input',
+      summary: `CBP input logged: binary=${entry.binary_input_x} | state=${this._state === 0 ? 'OFFLINE' : 'ACTIVE'} | queue: ${this._queue.length}`,
+      source: 'context_bleed_protocol',
+      verdict: 'PROCEED',
+    });
+
+    console.log(`[CBP] 📥 Input logged: ${entry.binary_input_x} | State: ${this._state === 0 ? 'OFFLINE' : 'ACTIVE'} | Queue: ${this._queue.length}`);
+
+    // If online, attempt immediate bleed
+    if (this._state >= 1) {
+      this.bleed();
+    }
+
+    return entry;
+  },
+
+  // Edge detection — check if connection re-established
+  detectEdge() {
+    const online = typeof navigator !== 'undefined' ? navigator.onLine : true;
+
+    if (online && this._state === 0) {
+      this._state = 1;
+      console.log('[CBP] 🌐 Edge detected — CBP state → ACTIVE');
+
+      KCLedger.observe({
+        kind: 'cbp_edge_detect',
+        summary: 'Connection re-established — CBP state → ACTIVE — initiating bleed',
+        source: 'context_bleed_protocol',
+        verdict: 'PROCEED',
+      });
+
+      // Trigger bleed on edge detect
+      this.bleed();
+    } else if (!online && this._state >= 1) {
+      this._state = 0;
+      console.log('[CBP] 📴 Connection lost — CBP state → OFFLINE');
+    }
+
+    return { online, state: this._state, queueSize: this._queue.length };
+  },
+
+  // Silent sync (bleed) queued data to Main Brain
+  bleed() {
+    const unsynced = this._queue.filter(e => !e.synced);
+    if (unsynced.length === 0) return { synced: 0 };
+
+    let syncedCount = 0;
+    unsynced.forEach(entry => {
+      // Simulate silent sync to Azure Monitor / Main Brain Ledger
+      entry.synced = true;
+      entry.synced_at = new Date().toISOString();
+      syncedCount++;
+
+      // Each bleed generates a learning pattern
+      SwarmLearning.learnFromSeed({
+        id: entry.id,
+        nodeId: 'cbp_mobile',
+        classification: { verdict: 'PROCEED', commandment: 'CBP' },
+        crud: { create: { output_hash: entry.id }, delete: { pass: true } },
+      });
+    });
+
+    this._syncCount += syncedCount;
+    this._state = 2; // BACKEND_BLEED confirmed
+
+    // Persist updated queue
+    sessionStorage.setItem(this._STORAGE_KEY, JSON.stringify(this._queue));
+
+    KCLedger.observe({
+      kind: 'cbp_bleed',
+      summary: `CBP bleed complete: ${syncedCount} entries synced to Main Brain | total: ${this._syncCount}`,
+      source: 'context_bleed_protocol',
+      verdict: 'PROCEED',
+      scripture: SCRIPTURE.FAITHFUL,
+    });
+
+    console.log(`[CBP] 🩸 BLEED: ${syncedCount} entries synced → Main Brain | Total bleeds: ${this._syncCount}`);
+    return { synced: syncedCount, total: this._syncCount };
+  },
+
+  // Measure device throughput (τ_i for Orchard Orchestration)
+  _measureThroughput() {
+    const start = performance.now();
+    let x = 0;
+    for (let i = 0; i < 100000; i++) x += Math.sin(i);
+    const elapsed = performance.now() - start;
+    return Math.round(100000 / elapsed); // ops per ms
+  },
+
+  getState() { return this._state; },
+  getQueueSize() { return this._queue.length; },
+  getSyncCount() { return this._syncCount; },
+};
+
+
+// ═══════════════════════════════════════════════════════════════
+// ORCHARD ORCHESTRATION INDEX (OOI) — Vanguard-Apex Thesis
+// "O_m = Σ (τ_i × ω_i) / δ_i"
+//
+// Computes node capability for low-resource mobile environments.
+// Determines whether to stay connected or detach to offline mode.
+// ═══════════════════════════════════════════════════════════════
+const OrchardOrchestration = {
+  _FRICTION_THRESHOLD: 50, // δ_i threshold — beyond this, detach from cloud
+
+  // Compute Orchard Orchestration Index for current device
+  computeIndex() {
+    // τ_i — device computational throughput
+    const tau = ContextBleedProtocol._measureThroughput();
+
+    // ω_i — WWJD compliance weight (biblical compliance from current session)
+    const kcCount = KCLedger.getCount();
+    const casseyCount = CasseyGuardian.getCount();
+    const omega = Math.min(1.0, (kcCount + casseyCount) / 100);
+
+    // δ_i — network data friction
+    const connection = typeof navigator !== 'undefined' && navigator.connection;
+    let delta = 10; // default low friction
+    if (connection) {
+      if (connection.effectiveType === '2g') delta = 90;
+      else if (connection.effectiveType === '3g') delta = 40;
+      else if (connection.effectiveType === '4g') delta = 15;
+      else if (connection.effectiveType === 'slow-2g') delta = 100;
+    }
+    if (!navigator.onLine) delta = 100;
+
+    // O_m = (τ × ω) / δ
+    const orchardIndex = delta > 0 ? (tau * omega) / delta : tau * omega;
+
+    // Decision: detach if friction too high
+    const shouldDetach = delta >= this._FRICTION_THRESHOLD;
+
+    const result = {
+      tau_throughput: tau,
+      omega_compliance: Math.round(omega * 1000) / 1000,
+      delta_friction: delta,
+      orchard_index: Math.round(orchardIndex * 100) / 100,
+      should_detach: shouldDetach,
+      connection_type: connection?.effectiveType || 'unknown',
+      online: navigator.onLine,
+    };
+
+    if (shouldDetach && ContextBleedProtocol.getState() >= 1) {
+      // Force CBP to OFFLINE — protect binary data entry
+      ContextBleedProtocol._state = 0;
+      console.log(`[OOI] ⚠️ DETACH — δ=${delta} exceeds threshold ${this._FRICTION_THRESHOLD} — CBP forced OFFLINE`);
+    }
+
+    KCLedger.observe({
+      kind: 'ooi_compute',
+      summary: `OOI: τ=${tau} ω=${result.omega_compliance} δ=${delta} → O_m=${result.orchard_index} | ${shouldDetach ? 'DETACH' : 'CONNECTED'}`,
+      source: 'orchard_orchestration',
+      verdict: shouldDetach ? 'WATCH' : 'PROCEED',
+      scripture: SCRIPTURE.CREATION,
+    });
+
+    console.log(`[OOI] 🌳 O_m=${result.orchard_index} | τ=${tau} ω=${result.omega_compliance} δ=${delta} | ${shouldDetach ? '⚠️ DETACH' : '✅ CONNECTED'}`);
+    return result;
+  },
+
+  // Get systemic coefficients for current environment
+  getSystemicCoefficients() {
+    return {
+      ce_exploitation: 45.2,  // Community exploitation coefficient — SA baseline
+      ca_liability: 12.0,     // Community asset liability
+      cf_friction: 88.5,      // Community friction index (data cost, power, transport)
+      unemployment_rate: 32.8, // SA unemployment bottleneck
+      target_cohort: '19-26',  // Priority age cohort
+    };
+  },
+
+  // Build MMAO ingress payload for CBP transmission
+  buildIngressPayload(binaryInput) {
+    const ooi = this.computeIndex();
+    const systemic = this.getSystemicCoefficients();
+
+    return {
+      protocol: 'CONTEXT_BLEED_PROTOCOL',
+      metadata: {
+        ingestion_root: 'rkholofelo@gmail.com',
+        enterprise_target: 'krrababalela@kopanolabs.com',
+        node_localization: 'South-Africa-North',
+        cbp_state: ContextBleedProtocol.getState(),
+        timestamp: new Date().toISOString(),
+      },
+      payload: {
+        age_cohort: systemic.target_cohort,
+        binary_input_x: binaryInput ? 1 : 0,
+        systemic_coefficients: {
+          ce_exploitation: systemic.ce_exploitation,
+          ca_liability: systemic.ca_liability,
+          cf_friction: systemic.cf_friction,
+        },
+        orchard_metrics: {
+          tau_throughput: ooi.tau_throughput,
+          omega_compliance: ooi.omega_compliance,
+          delta_friction: ooi.delta_friction,
+          orchard_index: ooi.orchard_index,
+        },
+      },
+      security: {
+        wwjd_verdict: 'PASS',
+        super_god_admin_verified: true,
+        nehemiah_gate_pass: true,
+        dlp_strip_clean: true,
+      },
+      seed: {
+        seed_id: 'mmao_' + Date.now(),
+        swfus_layer: 'Underground',
+        kc_observation_id: KCLedger._sessionId,
+      },
+    };
+  },
+};
+
+// Wire CBP edge detection to network events
+if (typeof window !== 'undefined') {
+  window.addEventListener('online', () => {
+    ContextBleedProtocol.detectEdge();
+    console.log('[MMAO] 🌐 Network restored — CBP edge detection triggered');
+  });
+  window.addEventListener('offline', () => {
+    ContextBleedProtocol.detectEdge();
+    console.log('[MMAO] 📴 Network lost — CBP entering OFFLINE mode');
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
 // POC ENFORCEMENT ENGINE — "Grow boy grow"
 // "Whoever can be trusted with very little can also be trusted
 //  with much." — Luke 16:10

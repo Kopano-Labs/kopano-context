@@ -1,0 +1,136 @@
+{
+  "$schema": "https://kopanolabs.com/schemas/gs_mb.json",
+  "$id": "https://kopanolabs.com/schemas/mmao_ingress.json",
+  "title": "MMAO Ingress Schema — Context Bleed Protocol",
+  "description": "Validation profile for incoming mobile telemetry packages from MMAO orchard nodes to GSMB Black Beast core.",
+  "type": "object",
+  "required": ["protocol", "metadata", "payload", "security"],
+  "properties": {
+    "protocol": {
+      "type": "string",
+      "enum": ["CONTEXT_BLEED_PROTOCOL"],
+      "description": "Must be CONTEXT_BLEED_PROTOCOL for MMAO ingress"
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["ingestion_root", "enterprise_target", "node_localization"],
+      "properties": {
+        "ingestion_root": {
+          "type": "string",
+          "format": "email",
+          "description": "Legacy identity root — rkholofelo@gmail.com (since 2007)"
+        },
+        "enterprise_target": {
+          "type": "string",
+          "format": "email",
+          "description": "Enterprise ingestion target — krrababalela@kopanolabs.com"
+        },
+        "node_localization": {
+          "type": "string",
+          "enum": ["South-Africa-North", "South-Africa-West", "South-Africa-SouthEast"],
+          "description": "Azure region localization for ingress routing"
+        },
+        "cbp_state": {
+          "type": "integer",
+          "enum": [0, 1],
+          "description": "Context Bleed Protocol state: 0=OFFLINE, 1=CBP_ACTIVE"
+        },
+        "device_id": {
+          "type": "string",
+          "description": "Unique mobile device identifier"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of telemetry capture"
+        }
+      }
+    },
+    "payload": {
+      "type": "object",
+      "required": ["binary_input_x"],
+      "properties": {
+        "age_cohort": {
+          "type": "string",
+          "description": "Target demographic cohort"
+        },
+        "binary_input_x": {
+          "type": "integer",
+          "enum": [0, 1],
+          "description": "User binary input state from the pavement"
+        },
+        "systemic_coefficients": {
+          "type": "object",
+          "properties": {
+            "ce_exploitation": {
+              "type": "number",
+              "description": "Community exploitation coefficient"
+            },
+            "ca_liability": {
+              "type": "number",
+              "description": "Community asset liability score"
+            },
+            "cf_friction": {
+              "type": "number",
+              "description": "Community friction index (data cost, power, transport)"
+            }
+          }
+        },
+        "orchard_metrics": {
+          "type": "object",
+          "properties": {
+            "tau_throughput": {
+              "type": "number",
+              "description": "τ_i — device computational throughput"
+            },
+            "omega_compliance": {
+              "type": "number",
+              "description": "ω_i — WWJD Firewall compliance weight"
+            },
+            "delta_friction": {
+              "type": "number",
+              "description": "δ_i — network data friction (cost/packet loss)"
+            },
+            "orchard_index": {
+              "type": "number",
+              "description": "O_m — computed orchard orchestration index"
+            }
+          }
+        }
+      }
+    },
+    "security": {
+      "type": "object",
+      "required": ["wwjd_verdict"],
+      "properties": {
+        "wwjd_verdict": {
+          "type": "string",
+          "enum": ["PASS", "FAIL", "HOLD"],
+          "description": "WWJD Firewall verdict on this payload"
+        },
+        "super_god_admin_verified": {
+          "type": "boolean",
+          "description": "Root identity verification via rkholofelo@kopanolabs.com"
+        },
+        "nehemiah_gate_pass": {
+          "type": "boolean",
+          "description": "Commandment III — access control pass"
+        },
+        "dlp_strip_clean": {
+          "type": "boolean",
+          "description": "Commandment VII — no sensitive data leakage"
+        }
+      }
+    },
+    "seed": {
+      "type": "object",
+      "properties": {
+        "seed_id": { "type": "string" },
+        "swfus_layer": { "type": "string", "enum": ["Sky", "Water", "Fire", "Underground", "Soil"] },
+        "crud_receipt": { "type": "string" },
+        "kc_observation_id": { "type": "string" },
+        "cassey_assessment_id": { "type": "string" }
+      }
+    }
+  }
+}
