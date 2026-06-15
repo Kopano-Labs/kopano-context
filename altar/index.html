@@ -407,7 +407,7 @@ Telemetry AI will classify before interpreting.
       document.getElementById('testPath').value = ep.path;
     }
 
-    // Test console — Animated gate processing powered by AltarGate + KC + Cassey
+    // Test console — Animated gate processing powered by AltarGate + KC + Cassey + Seed Protocol
     async function testEndpoint() {
       const method = document.getElementById('testMethod').value;
       const path = document.getElementById('testPath').value;
@@ -415,7 +415,11 @@ Telemetry AI will classify before interpreting.
       const ep = ENDPOINTS.find(e => e.path === path);
       const ts = new Date().toISOString().slice(11,19);
 
-      output.textContent = `[${ts}] [ALTAR_GATE] ${method} ${path}\n${'─'.repeat(60)}\n\n`;
+      // 🌱 SEED_IN — SWFUS classify before touching the API
+      const seedIn = SeedProtocol.seedIn('kopanocontext');
+      output.textContent = `🌱 [SEED_IN] kopanocontext → SWFUS: Sky | Classify before interpret\n`;
+      output.textContent += `   Seed: ${seedIn.id} | KC: ${seedIn.classification.verdict}\n\n`;
+      output.textContent += `[${ts}] [ALTAR_GATE] ${method} ${path}\n${'─'.repeat(60)}\n\n`;
 
       // KC observes the test
       KCLedger.observe({
@@ -497,6 +501,11 @@ Telemetry AI will classify before interpreting.
 
       // Cassey: Teach based on result
       CasseyGuardian.teachApprentice('altar_console', 'dispatch');
+
+      // 🌿 SEED_OUT — CRUD validate after gate verdict
+      const seedOut = SeedProtocol.seedOut(seedIn.id, `${method} ${path} → ALL LAYERS PASS`);
+      output.textContent += `\n🌿 [SEED_OUT] kopanocontext ← CRUD: C✅ R✅ U✅ D✅`;
+      output.textContent += `\n   Receipt: ${seedOut.crud.create.output_hash} | Seeds: ${SeedProtocol.getSeedCount()}`;
 
       // Update KC Ledger tab
       renderKCLedgerTab();
