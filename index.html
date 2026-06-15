@@ -434,36 +434,39 @@
       <p>Every node governed by the Altar · KC watches the ledger · Cassey teaches the apprentices</p>
     </div>
     <div class="pillars-grid" id="ecosystemGrid">
-      <div class="pillar-card" onclick="window.open('https://kopanolabs.com')" style="cursor:pointer;">
+      <div class="pillar-card" onclick="seedAndOpen('kopanolabs')" style="cursor:pointer;">
         <div class="pillar-icon">🏢</div>
         <div class="pillar-title">KopanoLabs.com</div>
         <div class="pillar-desc">Sovereign Product Studio — the organizational marketing hub and enterprise pipeline.</div>
         <div class="eco-health" id="health-kopanolabs"><span class="eco-health-dot" style="background:#8888aa"></span> checking...</div>
       </div>
-      <div class="pillar-card" onclick="window.open('https://krrababalela.com')" style="cursor:pointer;">
+      <div class="pillar-card" onclick="seedAndOpen('krrababalela')" style="cursor:pointer;">
         <div class="pillar-icon">👤</div>
         <div class="pillar-title">KRRababalela.com</div>
         <div class="pillar-desc">Chief Architect — Kholofelo Robyn Rababalela. Sovereign System Engineer. Creator of KPGS.</div>
         <div class="eco-health" id="health-krrababalela"><span class="eco-health-dot" style="background:#8888aa"></span> checking...</div>
       </div>
-      <div class="pillar-card" onclick="window.open('https://kasilink.com')" style="cursor:pointer;">
+      <div class="pillar-card" onclick="seedAndOpen('kasilink')" style="cursor:pointer;">
         <div class="pillar-icon">💼</div>
         <div class="pillar-title">KasiLink.com</div>
         <div class="pillar-desc">Township gigs & opportunities. KC AI chatbot active. Clerk auth. Cassey's teacher lane governs quality.</div>
         <div class="eco-health" id="health-kasilink"><span class="eco-health-dot" style="background:#8888aa"></span> checking...</div>
       </div>
-      <div class="pillar-card" onclick="window.open('https://crisisconnect.kopanolabs.com')" style="cursor:pointer;">
+      <div class="pillar-card" onclick="seedAndOpen('crisisconnect')" style="cursor:pointer;">
         <div class="pillar-icon">⚡</div>
         <div class="pillar-title">CrisisConnect</div>
         <div class="pillar-desc">Adaptive crisis response PWA — 6 dimensions of adaptation. Offline-first. Mission-grade.</div>
         <div class="eco-health" id="health-crisisconnect"><span class="eco-health-dot" style="background:#8888aa"></span> checking...</div>
       </div>
-      <div class="pillar-card" onclick="window.open('https://blog.fivesarena.com')" style="cursor:pointer;">
+      <div class="pillar-card" onclick="seedAndOpen('fivesarena')" style="cursor:pointer;">
         <div class="pillar-icon">⚽</div>
         <div class="pillar-title">FivesArena Blog</div>
         <div class="pillar-desc">Football culture, stories & legends — Ama-Phu Entertainment sector. Rushing Protocol creative node.</div>
         <div class="eco-health" id="health-fivesarena"><span class="eco-health-dot" style="background:#8888aa"></span> checking...</div>
       </div>
+    </div>
+    <div style="text-align:center;margin-top:24px;">
+      <button class="btn-primary" onclick="runSeedSweep()" style="background:linear-gradient(135deg,#00d4aa,#7b61ff);">🌱 Run Full Seed Sweep — SWFUS+CRUD All Nodes</button>
     </div>
   </section>
 
@@ -485,6 +488,10 @@
       <div class="kc-tracker-item">
         <span class="kc-tracker-dot" style="background:#ffd700;box-shadow:0 0 6px rgba(255,215,0,0.5)"></span>
         Session: <span class="kc-tracker-val" id="sessionTime">0m 0s</span>
+      </div>
+      <div class="kc-tracker-item">
+        <span class="kc-tracker-dot" style="background:#e94560;box-shadow:0 0 6px rgba(233,69,96,0.5)"></span>
+        Seeds: <span class="kc-tracker-val" id="seedCount">0</span>
       </div>
     </div>
   </footer>
@@ -616,15 +623,60 @@
     probeEcosystem();
     setInterval(probeEcosystem, 60000);
 
-    // ═══ KC/CASSEY SESSION TRACKER ═══
-    setInterval(() => {
+    // ═══ SEED AND OPEN — Every HTTPS click goes through SWFUS+CRUD ═══
+    // "A man reaps what he sows." — Galatians 6:7
+    async function seedAndOpen(nodeId) {
+      const node = SeedProtocol.NODES[nodeId];
+      if (!node) return;
+
+      // SEED_IN → SWFUS classify
+      await SeedProtocol.cycle(nodeId, async () => {
+        window.open(node.url, '_blank');
+        return 'user_navigate';
+      });
+
+      // Update tracker immediately
+      updateTracker();
+    }
+
+    // ═══ FULL SEED SWEEP — SWFUS+CRUD all 6 HTTPS nodes ═══
+    async function runSeedSweep() {
+      const btn = event.target;
+      btn.textContent = '🌱 Seeding...';
+      btn.disabled = true;
+
+      await SeedProtocol.cycleAll();
+
+      btn.textContent = `🌿 Sweep Complete — ${SeedProtocol.getSeedCount()} seeds planted`;
+      btn.disabled = false;
+      setTimeout(() => {
+        btn.textContent = '🌱 Run Full Seed Sweep — SWFUS+CRUD All Nodes';
+      }, 3000);
+
+      updateTracker();
+    }
+
+    // ═══ KC/CASSEY/SEED SESSION TRACKER ═══
+    function updateTracker() {
       const time = KCLedger.timeIsHealing();
       const kcEl = document.getElementById('kcCount');
       const casseyEl = document.getElementById('casseyCount');
       const timeEl = document.getElementById('sessionTime');
+      const seedEl = document.getElementById('seedCount');
       if (kcEl) kcEl.textContent = KCLedger.getCount();
       if (casseyEl) casseyEl.textContent = CasseyGuardian.getCount();
       if (timeEl) timeEl.textContent = time.display;
+      if (seedEl) seedEl.textContent = SeedProtocol.getSeedCount();
+    }
+    setInterval(updateTracker, 2000);
+
+    // ═══ AUTO-SEED ON LOAD — Passive seed sweep (no navigation) ═══
+    // KC plants seeds on every page load to validate ecosystem health
+    setTimeout(() => {
+      SeedProtocol.cycleAll().then(() => {
+        console.log('[SEED_PROTOCOL] 🌿 Auto-seed sweep complete on page load');
+        updateTracker();
+      });
     }, 2000);
   </script>
 </body>
