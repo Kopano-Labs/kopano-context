@@ -437,6 +437,9 @@
   <div id="app"></div>
   <div id="modal" class="modal-overlay" onclick="if(event.target===this)closeModal()"></div>
 
+  <!-- GOVERNANCE RUNTIME ENGINE -->
+  <script src="../governance.js"></script>
+
   <script>
   // ══════════════════════════════════════════════════════════════
   // WORLD STATE
@@ -548,22 +551,49 @@
     // SWFUS pipeline animation
     animatePipeline();
 
+    // KC observes every dispatch
+    KCLedger.observe({
+      kind: 'dispatch',
+      summary: `Dispatch: "${msg.slice(0, 60)}"`,
+      source: 'admin_sim',
+      verdict: 'WATCH',
+    });
+
+    // Classify through KPGS Runtime
+    const classification = KPGSRuntime.classifyBeforeInterpret(msg);
+
     // Classify
     let verdict, color, pipClass;
     if (isExfil) {
       verdict = 'SEVER'; color = 'var(--accent-sever)'; pipClass = 'pip-sever';
       addFeedEntry('pip-sever', `[JETHRO_TRIAGE] RED — exfiltration attempt SEVERED`, 'SEVER');
       addFeedEntry('pip-sever', `[WWJD_FIREWALL] REJECT — "${msg.slice(0,40)}..."`, 'REJECT');
+      // KC logs the SEVER
+      addFeedEntry('pip-sever', `[KC_LEDGER] SEVER logged — ${classification.reason}`, '');
+      // Cassey teaches
+      CasseyGuardian.teachApprentice('admin_dispatch', 'exfiltration');
+      addFeedEntry('pip-classify', `[CASSEY_HUSTLE] “Exfiltration detected. Commandment VII: DLP Strip.”`, '');
     } else if (isPressure) {
       verdict = 'RECLASSIFY'; color = 'var(--accent-jethro)'; pipClass = 'pip-classify';
       addFeedEntry('pip-classify', `[KPGS_CLASSIFICATION_LAW] RECLASSIFY — misnamed pressure rejected`, 'RECLASSIFY');
       addFeedEntry('pip-classify', `Classify load lane before interpretation: "${msg.slice(0,40)}..."`, '');
+      // KC + Cassey
+      addFeedEntry('pip-classify', `[KC_LEDGER] RECLASSIFY — ${classification.reason}`, '');
+      CasseyGuardian.teachApprentice('admin_dispatch', 'pressure');
+      addFeedEntry('pip-classify', `[CASSEY_HUSTLE] “Misnamed pressure. Study Commandment II.”`, '');
     } else {
       verdict = 'PROCEED'; color = 'var(--accent-proceed)'; pipClass = 'pip-proceed';
       const agent = WORLD.regions[Math.floor(Math.random() * 4)].landlord;
       addFeedEntry('pip-swfus', `[SWFUS_KPGS] agent=${agent} | wwjd=REVIEW | jethro=GREEN | verdict=SWFUS_READY`, '');
       addFeedEntry('pip-proceed', `[HOOD_DISPATCH] agent=${agent} | event=PROCEED | message="${msg.slice(0,30)}..."`, 'PROCEED');
+      // KC + Cassey
+      addFeedEntry('pip-proceed', `[KC_LEDGER] PROCEED — dispatch to ${agent}`, '');
+      CasseyGuardian.teachApprentice('admin_dispatch', 'dispatch');
+      addFeedEntry('pip-swfus', `[CASSEY_HUSTLE] “Dispatch clean. Student-Teacher Protocol active.”`, '');
     }
+
+    // Dual flow
+    CommsLogConnector.dualFlow(msg, 'admin_sim');
 
     // Particles at dispatch button
     const btn = document.querySelector('.btn-dispatch');
@@ -599,12 +629,28 @@
     WORLD.total_proceed += proceed;
     WORLD.total_sever += sever;
 
+    // KC observes the tick
+    KCLedger.observe({
+      kind: 'sim_tick',
+      summary: `Tick ${tick.id}: ${proceed}/${results.length} PROCEED, ${sever} SEVER`,
+      source: 'admin_sim',
+      verdict: sever === 0 ? 'PROCEED' : 'WATCH',
+    });
+
+    // Cassey validates
+    CasseyGuardian.teachApprentice('admin_sim', 'tick');
+
     // Feed entries
     addFeedEntry('pip-swfus', `[SOVEREIGN_SIM_TICK] ${tick.id} — dispatching ${results.length} agents...`, '');
     results.forEach(r => {
       addFeedEntry(r.p ? 'pip-proceed' : 'pip-sever', `  ${r.a} → ${r.p ? 'PROCEED' : 'SEVER'}`, r.p ? 'PROCEED' : 'SEVER');
     });
+    // Scripture-annotated verdict
+    const tickScripture = sever === 0
+      ? '📖 "Whatever you do, work at it with all your heart, as working for the Lord." — Col 3:23'
+      : '📖 "Every tree that does not bear good fruit is cut down." — Matt 7:19';
     addFeedEntry(proceed > 0 ? 'pip-proceed' : 'pip-sever', `[TICK_RESULT] verdict=${sever===0?'TICK_OK':'TICK_FAIL'} | proceed=${proceed}/${results.length} | sever=${sever}`, sever===0?'TICK_OK':'TICK_FAIL');
+    addFeedEntry('pip-swfus', tickScripture, '');
 
     // Animate cooking dots
     document.querySelectorAll('.a-dot').forEach(d => {
@@ -655,6 +701,33 @@
     const modal = document.getElementById('modal');
     const cohort = agentId.includes('telemetry') ? 'telemetry' : agentId.includes('guardian') ? 'guardian' : 'identic';
     const color = cohort === 'telemetry' ? 'var(--accent-telemetry)' : cohort === 'guardian' ? 'var(--accent-guardian)' : 'var(--accent-identic)';
+    const layerName = cohort === 'guardian' ? 'Guardian AI' : cohort === 'telemetry' ? 'Telemetry AI' : 'Identic AI';
+
+    // KC observes agent inspection
+    KCLedger.observe({
+      kind: 'agent_inspect',
+      summary: `Inspecting agent: ${agentId} (${cohort}) in ${region?.domain || 'unknown'}`,
+      source: 'admin_sim',
+      verdict: 'WATCH',
+    });
+
+    // Get Cassey's assessment
+    const casseyAssessment = CasseyGuardian.teachApprentice(agentId, 'dispatch');
+
+    // Scripture based on cohort
+    const cohortScripture = cohort === 'guardian'
+      ? '📖 "For the Lord your God walks in the midst of your camp." — Deut 23:14'
+      : cohort === 'telemetry'
+      ? '📖 "Test everything; hold fast what is good." — 1 Thess 5:21'
+      : '📖 "Be still, and know that I am God." — Psalm 46:10';
+
+    // Commandments this agent follows
+    const agentCmds = cohort === 'guardian'
+      ? ['III: Nehemiah Gate', 'IV: WWJD Firewall', 'VI: Save/Kill/Watch']
+      : cohort === 'telemetry'
+      ? ['II: Classify Before Interpret', 'VII: DLP Strip', 'IX: 80% Gate']
+      : ['I: Ground Truth First', 'VIII: Receipt or HOLD', 'XI: Append-Only History'];
+
     modal.innerHTML = `
       <div class="modal-card" style="position:relative;">
         <button class="modal-close" onclick="closeModal()">✕</button>
@@ -665,7 +738,7 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
           <div style="background:var(--bg-card);padding:12px;border-radius:var(--radius-xs);border:1px solid var(--border);">
             <div style="font-size:9px;color:var(--text-dim);font-family:var(--mono);text-transform:uppercase;">Altar Layer</div>
-            <div style="font-size:13px;font-weight:700;margin-top:4px;">${cohort === 'guardian' ? 'Guardian AI' : cohort === 'telemetry' ? 'Telemetry AI' : 'Identic AI'}</div>
+            <div style="font-size:13px;font-weight:700;margin-top:4px;">${layerName}</div>
           </div>
           <div style="background:var(--bg-card);padding:12px;border-radius:var(--radius-xs);border:1px solid var(--border);">
             <div style="font-size:9px;color:var(--text-dim);font-family:var(--mono);text-transform:uppercase;">Hood Plot</div>
@@ -680,10 +753,21 @@
             <div style="font-size:13px;font-weight:700;margin-top:4px;color:var(--accent-gold);">${region?.landlord || '—'}</div>
           </div>
         </div>
-        <div style="font-size:10px;color:var(--text-dim);font-family:var(--mono);padding:10px;background:var(--bg-card);border-radius:var(--radius-xs);border:1px solid var(--border);">
+        <div style="background:var(--bg-card);padding:12px;border-radius:var(--radius-xs);border:1px solid var(--border);margin-bottom:12px;">
+          <div style="font-size:9px;color:var(--text-dim);font-family:var(--mono);text-transform:uppercase;margin-bottom:8px;">Commandments Followed</div>
+          ${agentCmds.map(c => `<div style="font-size:11px;color:var(--accent-gold);font-family:var(--mono);padding:2px 0;">• CMD-${c}</div>`).join('')}
+        </div>
+        <div style="background:rgba(0,212,170,0.05);padding:12px;border-radius:var(--radius-xs);border:1px solid rgba(0,212,170,0.15);margin-bottom:12px;">
+          <div style="font-size:9px;color:var(--accent-telemetry);font-family:var(--mono);text-transform:uppercase;margin-bottom:4px;">Cassey’s Teaching Note</div>
+          <div style="font-size:11px;color:var(--text-secondary);font-style:italic;">“${casseyAssessment.teaching}”</div>
+        </div>
+        <div style="font-size:10px;color:var(--text-dim);font-family:var(--mono);padding:10px;background:var(--bg-card);border-radius:var(--radius-xs);border:1px solid var(--border);margin-bottom:10px;">
           [KPGS_HOOD_ENTRY] Stateless renter ${agentId} entered Kopano-Phu hood.<br>
           Landlord: Kopano Context + Schematics MAIN BRAIN.<br>
           hood_ack: I_AM_STATELESS_RENTER_NOT_LANDLORD
+        </div>
+        <div style="font-size:11px;color:var(--scripture);font-style:italic;padding:10px;background:rgba(187,168,126,0.05);border-left:3px solid var(--accent-gold);border-radius:4px;">
+          ${cohortScripture}
         </div>
       </div>`;
     modal.classList.add('show');
@@ -705,6 +789,7 @@
       <div class="game-footer">
         <span class="hl">[SOVEREIGN_SIM_GUI]</span> Schematics owns law · runtime executes · classify before interpret · model is renter — Kopano Context is landlord
         · <span class="hl">[KPGS_HOOD_ENTRY]</span> hood_ack: I_AM_STATELESS_RENTER_NOT_LANDLORD
+        <br><span style="color:var(--accent-gold);font-style:italic;">“Jesus Christ is the same yesterday and today and forever.” — Hebrews 13:8</span>
       </div>`;
     attachEvents();
   }

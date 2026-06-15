@@ -331,7 +331,11 @@ Telemetry AI will classify before interpreting.
   <footer class="altar-footer">
     <span class="hl">[KPGS_ALTAR]</span> Covenant observatory · Black Mask v2.0 · WWJD inline firewall · APIs as legacy transport
     · <span class="hl">[HOOD_ACK]</span> I_AM_STATELESS_RENTER_NOT_LANDLORD
+    <br><span style="color:var(--scripture-text);font-style:italic;">“Jesus Christ is the same yesterday and today and forever.” — Hebrews 13:8</span>
   </footer>
+
+  <!-- GOVERNANCE RUNTIME ENGINE -->
+  <script src="../governance.js"></script>
 
   <script>
     // API Endpoints with scripture mapping
@@ -403,79 +407,129 @@ Telemetry AI will classify before interpreting.
       document.getElementById('testPath').value = ep.path;
     }
 
-    // Test console
-    function testEndpoint() {
+    // Test console — Animated gate processing powered by AltarGate + KC + Cassey
+    async function testEndpoint() {
       const method = document.getElementById('testMethod').value;
       const path = document.getElementById('testPath').value;
       const output = document.getElementById('testOutput');
       const ep = ENDPOINTS.find(e => e.path === path);
       const ts = new Date().toISOString().slice(11,19);
 
-      let result = `[${ts}] [ALTAR_GATE] ${method} ${path}\n`;
-      result += `${'─'.repeat(60)}\n\n`;
+      output.textContent = `[${ts}] [ALTAR_GATE] ${method} ${path}\n${'─'.repeat(60)}\n\n`;
 
-      // Layer 1: Guardian
-      result += `⏳ Layer 1 — Guardian AI: Checking institutional authorization...\n`;
+      // KC observes the test
+      KCLedger.observe({
+        kind: 'altar_test',
+        summary: `Testing ${method} ${path}`,
+        source: 'altar_console',
+        verdict: 'WATCH',
+      });
+
+      // Animated Layer 1: Guardian AI (200ms)
+      output.textContent += `⏳ Layer 1 — Guardian AI: Checking institutional authorization...\n`;
+      await new Promise(r => setTimeout(r, 200));
       const isGod = path.includes('/god/');
       const isAuth = path.includes('/auth/');
       if (isGod) {
-        result += `  🛡️ [GUARDIAN] God-mode endpoint detected. Require operator + god_only=True\n`;
-        result += `  📖 "For from Him and through Him and to Him are all things." — Romans 11:36\n`;
-        result += `  ✅ Guardian PASS (operator authority verified)\n\n`;
+        output.textContent += `  🛡️ [GUARDIAN] God-mode endpoint detected. Require operator + god_only=True\n`;
+        output.textContent += `  📖 "For from Him and through Him and to Him are all things." — Romans 11:36\n`;
       } else if (isAuth) {
-        result += `  🛡️ [GUARDIAN] Authentication endpoint — public gate, monitor only\n`;
-        result += `  📖 "I am the gate; whoever enters through me will be saved." — John 10:9\n`;
-        result += `  ✅ Guardian PASS (public auth lane)\n\n`;
+        output.textContent += `  🛡️ [GUARDIAN] Authentication endpoint — public gate, monitor only\n`;
+        output.textContent += `  📖 "I am the gate; whoever enters through me will be saved." — John 10:9\n`;
       } else {
-        result += `  🛡️ [GUARDIAN] Standard API call — lower node cannot query higher structural assets\n`;
-        result += `  ✅ Guardian PASS\n\n`;
+        output.textContent += `  🛡️ [GUARDIAN] Standard API call — lower node cannot query higher structural assets\n`;
       }
+      output.textContent += `  ✅ Guardian PASS\n\n`;
 
-      // Layer 2: Natural
-      result += `⏳ Layer 2 — Natural AI: Verifying data provenance...\n`;
+      // Animated Layer 2: Natural AI (200ms)
+      output.textContent += `⏳ Layer 2 — Natural AI: Verifying data provenance...\n`;
+      await new Promise(r => setTimeout(r, 200));
       const isLang = path.includes('/language/');
       const isCreator = path.includes('/creator/');
       if (isLang) {
-        result += `  🌿 [NATURAL] Language endpoint — SA soil linguistics. Ground truth is local.\n`;
-        result += `  📖 "After this I looked... from every nation, tribe, people and language." — Rev 7:9\n`;
-        result += `  ✅ Natural PASS (provenance verified)\n\n`;
+        output.textContent += `  🌿 [NATURAL] Language endpoint — SA soil linguistics. Ground truth is local.\n`;
+        output.textContent += `  📖 "After this I looked... from every nation, tribe, people and language." — Rev 7:9\n`;
       } else if (isCreator) {
-        result += `  🌿 [NATURAL] Creator surface — code/canvas/research patterns from local telemetry\n`;
-        result += `  📖 "In the beginning God created the heavens and the earth." — Genesis 1:1\n`;
-        result += `  ✅ Natural PASS\n\n`;
+        output.textContent += `  🌿 [NATURAL] Creator surface — code/canvas/research patterns from local telemetry\n`;
+        output.textContent += `  📖 "In the beginning God created the heavens and the earth." — Genesis 1:1\n`;
       } else {
-        result += `  🌿 [NATURAL] No spatial data in payload — pass-through\n`;
-        result += `  ✅ Natural PASS\n\n`;
+        output.textContent += `  🌿 [NATURAL] No spatial data in payload — pass-through\n`;
       }
+      output.textContent += `  ✅ Natural PASS\n\n`;
 
-      // Layer 3: Telemetry
-      result += `⏳ Layer 3 — Telemetry AI: Classify before interpret...\n`;
+      // Animated Layer 3: Telemetry AI (200ms)
+      output.textContent += `⏳ Layer 3 — Telemetry AI: Classify before interpret...\n`;
+      await new Promise(r => setTimeout(r, 200));
       const isMao = path.includes('/mao/');
       if (isMao) {
-        result += `  📡 [TELEMETRY] MAO orchestrator — classifying intent + message payload\n`;
-        result += `  📖 "But test everything; hold fast what is good." — 1 Thess 5:21\n`;
-        result += `  🔍 DLP check: payload stripped of telemetry markers\n`;
-        result += `  ✅ Telemetry PASS (classified)\n\n`;
+        output.textContent += `  📡 [TELEMETRY] MAO orchestrator — classifying intent + message payload\n`;
+        output.textContent += `  📖 "But test everything; hold fast what is good." — 1 Thess 5:21\n`;
+        output.textContent += `  🔍 DLP check: payload stripped of telemetry markers\n`;
       } else {
-        result += `  📡 [TELEMETRY] Standard classification — no misnamed pressure detected\n`;
-        result += `  ✅ Telemetry PASS\n\n`;
+        output.textContent += `  📡 [TELEMETRY] Standard classification — no misnamed pressure detected\n`;
       }
+      output.textContent += `  ✅ Telemetry PASS\n\n`;
 
-      // WWJD check
+      // WWJD check for critical endpoints
       if (isGod || isMao) {
-        result += `⏳ WWJD Firewall: Critical boundary check...\n`;
-        result += `  ✝️ [WWJD] Power without law? NO. Extractive deal? NO. Institutional collapse? NO.\n`;
-        result += `  📖 "Not by might nor by power, but by my Spirit." — Zechariah 4:6\n`;
-        result += `  ✅ WWJD PASS\n\n`;
+        output.textContent += `⏳ WWJD Firewall: Critical boundary check...\n`;
+        await new Promise(r => setTimeout(r, 200));
+        const wwjd = KPGSRuntime.wwjdFirewall(path);
+        output.textContent += `  ✝️ [WWJD] Power without law? NO. Extractive deal? NO. Institutional collapse? NO.\n`;
+        output.textContent += `  📖 "Not by might nor by power, but by my Spirit." — Zechariah 4:6\n`;
+        output.textContent += `  ✅ WWJD PASS\n\n`;
       }
 
-      result += `${'═'.repeat(60)}\n`;
-      result += `[ALTAR_VERDICT] ALL LAYERS PASS — ${method} ${path}\n`;
-      result += `[ALTAR_POSTURE] Legacy transport → Monitor → Sovereign MCP target\n`;
-      if (ep) result += `\n📖 ${ep.scripture}\n`;
-      result += `\n[HOOD_ACK] I_AM_STATELESS_RENTER_NOT_LANDLORD`;
+      output.textContent += `${'═'.repeat(60)}\n`;
+      output.textContent += `[ALTAR_VERDICT] ALL LAYERS PASS — ${method} ${path}\n`;
+      output.textContent += `[ALTAR_POSTURE] Legacy transport → Monitor → Sovereign MCP target\n`;
+      if (ep) output.textContent += `\n📖 ${ep.scripture}\n`;
+      output.textContent += `\n[HOOD_ACK] I_AM_STATELESS_RENTER_NOT_LANDLORD`;
 
-      output.textContent = result;
+      // KC Ledger: Log the complete test
+      KCLedger.observe({
+        kind: 'altar_gate_complete',
+        summary: `${method} ${path} → ALL LAYERS PASS`,
+        source: 'altar_console',
+        verdict: 'PROCEED',
+        scripture: ep ? ep.scripture : '',
+      });
+
+      // Cassey: Teach based on result
+      CasseyGuardian.teachApprentice('altar_console', 'dispatch');
+
+      // Update KC Ledger tab
+      renderKCLedgerTab();
+    }
+
+    // KC Ledger Tab — shows session gate history
+    function renderKCLedgerTab() {
+      let tab = document.getElementById('kcLedgerTab');
+      if (!tab) {
+        tab = document.createElement('div');
+        tab.id = 'kcLedgerTab';
+        tab.style.cssText = 'max-width:1100px;margin:16px auto 0;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;';
+        document.querySelector('.console-section').appendChild(tab);
+      }
+      const entries = KCLedger.getSessionLedger().filter(e => e.source === 'altar_console' || e.source === 'altar_gate');
+      const time = KCLedger.timeIsHealing();
+      tab.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div class="section-label" style="margin:0">KC Ledger — Altar Session Log (${entries.length} entries)</div>
+          <div style="font-size:10px;font-family:var(--mono);color:var(--natural);">🟢 KC Active · ${time.display} · “Be still, and know that I am God.”</div>
+        </div>
+        <div style="max-height:200px;overflow-y:auto;">
+          ${entries.length === 0 ? '<div style="font-size:11px;color:var(--text-dim);font-family:var(--mono);text-align:center;padding:20px;">No altar tests yet. Use the console above to test an endpoint.</div>' :
+          entries.map(e => `
+            <div style="display:flex;gap:8px;align-items:center;padding:6px 10px;margin-bottom:4px;border-radius:6px;background:rgba(255,255,255,0.02);font-size:10px;font-family:var(--mono);">
+              <span style="color:${e.verdict==='PROCEED'?'var(--natural)':e.verdict==='SEVER'?'var(--guardian)':'var(--telemetry)'};">●</span>
+              <span style="color:var(--text-dim);width:60px;flex-shrink:0;">${e.ts.slice(11,19)}</span>
+              <span style="color:var(--text-sec);flex:1;">${e.summary}</span>
+              <span style="color:${e.verdict==='PROCEED'?'var(--natural)':'var(--telemetry)'};font-weight:700;">${e.verdict}</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
     }
   </script>
 </body>

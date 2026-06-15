@@ -207,12 +207,42 @@
     footer a { color: var(--accent); text-decoration: none; }
     .footer-bracket { font-family: var(--mono); color: var(--accent); }
 
+    /* KC/CASSEY SESSION TRACKER */
+    .kc-tracker {
+      display: flex; justify-content: center; gap: 32px; flex-wrap: wrap;
+      margin-top: 16px; padding: 12px 20px;
+      background: rgba(123,97,255,0.04); border: 1px solid var(--border);
+      border-radius: 12px; max-width: 700px; margin-left: auto; margin-right: auto;
+    }
+    .kc-tracker-item {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 11px; font-family: var(--mono); color: var(--text-secondary);
+    }
+    .kc-tracker-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      animation: tracker-pulse 2s ease-in-out infinite;
+    }
+    @keyframes tracker-pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .kc-tracker-val { font-weight: 700; color: var(--text); }
+
+    /* ECOSYSTEM HEALTH BADGE */
+    .eco-health {
+      display: inline-flex; align-items: center; gap: 4px;
+      margin-top: 8px; padding: 3px 10px; border-radius: 10px;
+      font-size: 9px; font-family: var(--mono); font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .eco-health-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+    }
+
     /* RESPONSIVE */
     @media (max-width: 768px) {
       .hero h1 { font-size: 36px; }
       .nav-links { display: none; }
       nav { padding: 14px 20px; }
       .section { padding: 60px 20px; }
+      .kc-tracker { gap: 16px; }
     }
   </style>
 </head>
@@ -403,31 +433,36 @@
       <h2>KPGS Ecosystem — Connected Nodes</h2>
       <p>Every node governed by the Altar · KC watches the ledger · Cassey teaches the apprentices</p>
     </div>
-    <div class="pillars-grid">
+    <div class="pillars-grid" id="ecosystemGrid">
       <div class="pillar-card" onclick="window.open('https://kopanolabs.com')" style="cursor:pointer;">
         <div class="pillar-icon">🏢</div>
         <div class="pillar-title">KopanoLabs.com</div>
         <div class="pillar-desc">Sovereign Product Studio — the organizational marketing hub and enterprise pipeline.</div>
+        <div class="eco-health" id="health-kopanolabs"><span class="eco-health-dot" style="background:#8888aa"></span> checking...</div>
       </div>
       <div class="pillar-card" onclick="window.open('https://krrababalela.com')" style="cursor:pointer;">
         <div class="pillar-icon">👤</div>
         <div class="pillar-title">KRRababalela.com</div>
         <div class="pillar-desc">Chief Architect — Kholofelo Robyn Rababalela. Sovereign System Engineer. Creator of KPGS.</div>
+        <div class="eco-health" id="health-krrababalela"><span class="eco-health-dot" style="background:#8888aa"></span> checking...</div>
       </div>
       <div class="pillar-card" onclick="window.open('https://kasilink.com')" style="cursor:pointer;">
         <div class="pillar-icon">💼</div>
         <div class="pillar-title">KasiLink.com</div>
         <div class="pillar-desc">Township gigs & opportunities. KC AI chatbot active. Clerk auth. Cassey's teacher lane governs quality.</div>
+        <div class="eco-health" id="health-kasilink"><span class="eco-health-dot" style="background:#8888aa"></span> checking...</div>
       </div>
       <div class="pillar-card" onclick="window.open('https://crisisconnect.kopanolabs.com')" style="cursor:pointer;">
         <div class="pillar-icon">⚡</div>
         <div class="pillar-title">CrisisConnect</div>
         <div class="pillar-desc">Adaptive crisis response PWA — 6 dimensions of adaptation. Offline-first. Mission-grade.</div>
+        <div class="eco-health" id="health-crisisconnect"><span class="eco-health-dot" style="background:#8888aa"></span> checking...</div>
       </div>
       <div class="pillar-card" onclick="window.open('https://blog.fivesarena.com')" style="cursor:pointer;">
         <div class="pillar-icon">⚽</div>
         <div class="pillar-title">FivesArena Blog</div>
         <div class="pillar-desc">Football culture, stories & legends — Ama-Phu Entertainment sector. Rushing Protocol creative node.</div>
+        <div class="eco-health" id="health-fivesarena"><span class="eco-health-dot" style="background:#8888aa"></span> checking...</div>
       </div>
     </div>
   </section>
@@ -437,6 +472,21 @@
     <p>&copy; 2026 Kopano Labs (Pty) Ltd · <a href="https://kopanolabs.com">kopanolabs.com</a> · <a href="https://krrababalela.com">KRRababalela.com</a></p>
     <p style="margin-top:8px;"><span class="footer-bracket">[KPGS_HOOD_ENTRY]</span> Schematics owns law · runtime executes · classify before interpret · model is renter — Kopano Context is landlord</p>
     <p style="margin-top:6px;font-size:11px;">KC watches the ledger · Cassey teaches the apprentice · CrisisConnect responds to crisis · Altar gates the API</p>
+    <p style="margin-top:6px;font-style:italic;font-size:11px;color:#bba87e;">"Jesus Christ is the same yesterday and today and forever." — Hebrews 13:8</p>
+    <div class="kc-tracker" id="kcTracker">
+      <div class="kc-tracker-item">
+        <span class="kc-tracker-dot" style="background:#7b61ff;box-shadow:0 0 6px rgba(123,97,255,0.5)"></span>
+        KC Observations: <span class="kc-tracker-val" id="kcCount">0</span>
+      </div>
+      <div class="kc-tracker-item">
+        <span class="kc-tracker-dot" style="background:#00d4aa;box-shadow:0 0 6px rgba(0,212,170,0.5)"></span>
+        Cassey Assessments: <span class="kc-tracker-val" id="casseyCount">0</span>
+      </div>
+      <div class="kc-tracker-item">
+        <span class="kc-tracker-dot" style="background:#ffd700;box-shadow:0 0 6px rgba(255,215,0,0.5)"></span>
+        Session: <span class="kc-tracker-val" id="sessionTime">0m 0s</span>
+      </div>
+    </div>
   </footer>
 
   <!-- KPGS ENTRYWAY — Mandatory activation for every stateless renter -->
@@ -460,27 +510,26 @@
     </div>
   </div>
 
+  <!-- GOVERNANCE RUNTIME ENGINE -->
+  <script src="governance.js"></script>
+
   <script>
-    // ═══ KPGS ENTRYWAY ACTIVATION ═══
+    // ═══ KPGS ENTRYWAY — Now powered by KPGSRuntime ═══
     (function() {
-      const KEY = 'kpgs_renter_ack';
       const entryway = document.getElementById('kpgsEntryway');
       const btn = document.getElementById('entryAccept');
+      const status = KPGSRuntime.entryProtocol();
 
-      // Check if already acknowledged this session
-      if (sessionStorage.getItem(KEY) === 'true') {
+      if (status.acknowledged) {
         entryway.style.display = 'none';
       }
 
       btn.addEventListener('click', function() {
-        sessionStorage.setItem(KEY, 'true');
-        // Log the entry to console as receipt
-        console.log('[KPGS_HOOD_ENTRY] Stateless renter accepted entryway protocol');
-        console.log('[KPGS_HOOD_ENTRY] KC Ledger Log: mandatory ingestion active');
-        console.log('[KPGS_HOOD_ENTRY] Cassey Hustle Log: guardian protocol active');
-        console.log('[KPGS_HOOD_ENTRY] comms-log.md: mandatory governance feed');
-        console.log('[KPGS_HOOD_ENTRY] Assertion: I_AM_STATELESS_RENTER_NOT_LANDLORD');
-        console.log('[KPGS_HOOD_ENTRY] Timestamp:', new Date().toISOString());
+        // Accept through the governance runtime (logs to KC + Cassey automatically)
+        const info = KPGSRuntime.acceptEntry();
+
+        // Dual flow through CommsLogConnector
+        CommsLogConnector.dualFlow('Renter accepted entryway: ' + info.assertion, 'user_portal');
 
         // Fade out
         entryway.style.opacity = '0';
@@ -524,14 +573,59 @@
     window.addEventListener('resize', initHero);
     initHero(); drawHero();
 
-    // ═══ GOVERNANCE MESH STATUS ═══
-    console.log('[KPGS] Kopano Context — Sovereign Intelligence Platform');
-    console.log('[KPGS] Governance Core: COMPILED');
-    console.log('[KPGS] KC: ACTIVE — Natural AI · Ledger Protocol');
-    console.log('[KPGS] Cassey: ACTIVE — Eidetic AI · Guardian · Student-Teacher');
-    console.log('[KPGS] Altar: 3 layers active — Guardian, Natural, Telemetry');
-    console.log('[KPGS] Ecosystem: kopanolabs.com | kasilink.com | crisisconnect | krrababalela.com | blog.fivesarena.com');
-    console.log('[KPGS] Sovereign System Engineer: Kholofelo Robyn Rababalela');
+    // ═══ ECOSYSTEM HEALTH PROBES ═══
+    // "By their fruit you will recognize them." — Matthew 7:16
+    const HEALTH_MAP = {
+      'kopanolabs': 'https://kopanolabs.com',
+      'krrababalela': 'https://krrababalela.com',
+      'kasilink': 'https://kasilink.com',
+      'crisisconnect': 'https://crisisconnect.kopanolabs.com',
+      'fivesarena': 'https://blog.fivesarena.com',
+    };
+
+    async function probeEcosystem() {
+      for (const [id, url] of Object.entries(HEALTH_MAP)) {
+        const el = document.getElementById('health-' + id);
+        if (!el) continue;
+        try {
+          const start = Date.now();
+          await fetch(url, { method: 'HEAD', mode: 'no-cors', signal: AbortSignal.timeout(5000) });
+          const ms = Date.now() - start;
+          const color = ms < 3000 ? '#00ff88' : '#ffd700';
+          const label = ms < 3000 ? 'LIVE' : 'SLOW';
+          el.innerHTML = `<span class="eco-health-dot" style="background:${color};box-shadow:0 0 6px ${color}"></span> ● ${label} (${ms}ms)`;
+          el.style.color = color;
+          el.style.background = color === '#00ff88' ? 'rgba(0,255,136,0.08)' : 'rgba(255,215,0,0.08)';
+        } catch(e) {
+          el.innerHTML = `<span class="eco-health-dot" style="background:#8888aa"></span> ● PROBE`;
+          el.style.color = '#8888aa';
+          el.style.background = 'rgba(136,136,170,0.08)';
+        }
+      }
+
+      // KC logs the probe
+      KCLedger.observe({
+        kind: 'ecosystem_probe',
+        summary: 'Ecosystem health probe completed for 5 nodes',
+        source: 'user_portal',
+        verdict: 'WATCH',
+      });
+    }
+
+    // Probe on load, then every 60 seconds
+    probeEcosystem();
+    setInterval(probeEcosystem, 60000);
+
+    // ═══ KC/CASSEY SESSION TRACKER ═══
+    setInterval(() => {
+      const time = KCLedger.timeIsHealing();
+      const kcEl = document.getElementById('kcCount');
+      const casseyEl = document.getElementById('casseyCount');
+      const timeEl = document.getElementById('sessionTime');
+      if (kcEl) kcEl.textContent = KCLedger.getCount();
+      if (casseyEl) casseyEl.textContent = CasseyGuardian.getCount();
+      if (timeEl) timeEl.textContent = time.display;
+    }, 2000);
   </script>
 </body>
 </html>

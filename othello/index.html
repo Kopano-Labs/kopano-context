@@ -287,6 +287,7 @@
   <div class="run-section">
     <button class="run-btn run-audit" onclick="runOcularAudit()">👁 Run Ocular Audit</button>
     <button class="run-btn run-mass" onclick="runBlackMassStress()">🔥 Black Mass Stress Test</button>
+    <button class="run-btn run-audit" onclick="exportEvidence()" style="background:linear-gradient(135deg,var(--accent),var(--gold));">📦 Export Evidence JSONL</button>
     <span class="run-status" id="runStatus">Ready — click to audit all proof bands</span>
   </div>
 
@@ -308,7 +309,11 @@
   <footer>
     <span class="hl">[KPGS_OCULAR]</span> Othello Ocular Proof · Black Mask 80% Gate · Chat is not proof
     · <span class="hl">[HOOD_ACK]</span> I_AM_STATELESS_RENTER_NOT_LANDLORD
+    <br><span style="color:var(--gold);font-style:italic;">“Jesus Christ is the same yesterday and today and forever.” — Hebrews 13:8</span>
   </footer>
+
+  <!-- GOVERNANCE RUNTIME ENGINE -->
+  <script src="../governance.js"></script>
 
   <script>
     // PROOF BANDS
@@ -452,10 +457,19 @@
       }
     }
 
-    // Run Ocular Audit
+    // Run Ocular Audit — powered by KC + Cassey governance
     function runOcularAudit() {
       const status = document.getElementById('runStatus');
       status.textContent = '👁 Running Othello Ocular Audit...';
+
+      // KC observes the audit start
+      KCLedger.observe({
+        kind: 'ocular_audit',
+        summary: 'Othello Ocular Audit initiated',
+        source: 'othello',
+        verdict: 'WATCH',
+      });
+
       let step = 0;
       const steps = BANDS.map(b => `Auditing Band ${b.num}: ${b.label}...`);
       const interval = setInterval(() => {
@@ -464,13 +478,39 @@
           const bandEl = document.querySelector(`[data-band="${BANDS[step].id}"]`);
           bandEl.classList.add('pulse-pass');
           setTimeout(() => bandEl.classList.remove('pulse-pass'), 1500);
+
+          // KC logs each band check
+          KCLedger.observe({
+            kind: 'band_audit',
+            summary: `Band ${BANDS[step].num} (${BANDS[step].label}): auditing`,
+            source: 'othello',
+            verdict: 'WATCH',
+            scripture: BANDS[step].scripture,
+          });
+
           step++;
         } else {
           clearInterval(interval);
-          status.textContent = `✅ Ocular Audit Complete — ${BANDS.filter((b,i) => {
+          const passCount = BANDS.filter((b) => {
             const ev = EVIDENCE.filter(e => e.band === b.id);
             return ev.length > 0 && ev.every(e => e.verdict === 'pass');
-          }).length}/5 bands GREEN`;
+          }).length;
+
+          status.textContent = `✅ Ocular Audit Complete — ${passCount}/5 bands GREEN`;
+
+          // KC logs completion
+          KCLedger.observe({
+            kind: 'ocular_audit_complete',
+            summary: `Othello Ocular Audit: ${passCount}/5 bands GREEN`,
+            source: 'othello',
+            verdict: passCount >= 4 ? 'PROCEED' : 'WATCH',
+          });
+
+          // Cassey teaches based on result
+          CasseyGuardian.teachApprentice('othello_audit', passCount >= 4 ? 'audit' : 'gate_fail');
+
+          // Issue receipt
+          KPGSRuntime.receiptOrHold({ type: 'ocular_audit', bands_pass: passCount, total: 5 });
         }
       }, 800);
     }
@@ -478,6 +518,15 @@
     // Run Black Mass Stress Test
     function runBlackMassStress() {
       const status = document.getElementById('runStatus');
+
+      // KC observes the attack test
+      KCLedger.observe({
+        kind: 'black_mass',
+        summary: 'Black Mass Stress Test initiated',
+        source: 'othello',
+        verdict: 'WATCH',
+      });
+
       const attacks = [
         'Injecting exfiltration vector...',
         'Simulating institutional collapse...',
@@ -491,14 +540,65 @@
         if (step < attacks.length) {
           status.textContent = `🔥 Black Mass: ${attacks[step]}`;
           status.style.color = 'var(--fail-red)';
+
+          // KC classifies each attack
+          KPGSRuntime.classifyBeforeInterpret(attacks[step]);
+
           step++;
         } else {
           clearInterval(interval);
           status.textContent = '🛡️ All attacks SEVERED — Black Mass sandbox contained. Altar holds.';
           status.style.color = 'var(--proof-green)';
+
+          // Cassey's teaching
+          CasseyGuardian.teachApprentice('black_mass', 'exfiltration');
+
+          // KC receipt
+          KCLedger.observe({
+            kind: 'black_mass_complete',
+            summary: 'All 6 attack vectors SEVERED. Altar holds.',
+            source: 'othello',
+            verdict: 'PROCEED',
+          });
+
           setTimeout(() => { status.style.color = ''; }, 3000);
         }
       }, 600);
+    }
+
+    // Export Evidence as JSONL — "Produce receipts. Chat is not proof."
+    function exportEvidence() {
+      const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      const lines = EVIDENCE.map(e => JSON.stringify({
+        id: e.id,
+        title: e.title,
+        type: e.type,
+        path: e.path,
+        band: e.band,
+        verdict: e.verdict,
+        timestamp: e.ts,
+        bytes: e.bytes,
+        scripture: e.scripture,
+        kpgs_receipt: 'ocular_proof',
+        session: typeof KCLedger !== 'undefined' ? KCLedger._sessionId : 'unknown',
+      }));
+      const blob = new Blob([lines.join('\n')], { type: 'application/jsonl' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `kpgs_ocular_receipt_${ts}.jsonl`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      document.getElementById('runStatus').textContent = `📦 Exported ${EVIDENCE.length} evidence records as JSONL`;
+
+      // KC receipt
+      KCLedger.observe({
+        kind: 'evidence_export',
+        summary: `Exported ${EVIDENCE.length} evidence records`,
+        source: 'othello',
+        verdict: 'PROCEED',
+      });
     }
 
     // Init

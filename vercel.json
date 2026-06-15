@@ -1,0 +1,14 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": true,
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-KPGS-Hood-Entry", "value": "I_AM_STATELESS_RENTER_NOT_LANDLORD" },
+        { "key": "X-KPGS-Sovereign", "value": "Kopano Context is landlord" },
+        { "key": "X-KPGS-Runtime", "value": "governance.js compiled" }
+      ]
+    }
+  ]
+}
