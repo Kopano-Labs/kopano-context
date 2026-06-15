@@ -671,7 +671,14 @@ const SeedProtocol = {
       result = action || 'passive_seed';
     }
 
-    return this.seedOut(seedIn.id, result);
+    const seedResult = this.seedOut(seedIn.id, result);
+
+    // Phase 3: Auto-learn from every completed seed
+    if (seedResult && typeof SwarmLearning !== 'undefined') {
+      SwarmLearning.learnFromSeed(seedResult);
+    }
+
+    return seedResult;
   },
 
   // Cycle ALL nodes — full ecosystem seed sweep
